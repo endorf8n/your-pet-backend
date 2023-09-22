@@ -13,4 +13,6 @@ const loginValidateMiddleware = validateBody(schemas.userLoginSchema);
 
 router.post("/register", registerValidateMiddleware, ctrl.register);
 
+router.post("/login", loginValidateMiddleware, ctrl.login);
+
 module.exports = router;

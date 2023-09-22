@@ -1,13 +1,13 @@
-// const { isValidObjectId } = require("mongoose");
+const { isValidObjectId } = require("mongoose");
 
-// const { HttpError } = require("../helpers");
+const { HttpError } = require("../helpers");
 
-// const isValidId = (req, res, next) => {
-//   const { contactId } = req.params;
-//   if (!isValidObjectId(contactId)) {
-//     return next(HttpError(404, `${contactId} is not valid id`));
-//   }
-//   next();
-// };
+const isValidId = (req, res, next) => {
+  const { noticeId } = req.params;
+  if (!isValidObjectId(noticeId)) {
+    return next(HttpError(404, `${noticeId} is not valid id`));
+  }
+  next();
+};
 
-// module.exports = isValidId;
+module.exports = isValidId;

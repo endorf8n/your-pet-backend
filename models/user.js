@@ -28,8 +28,6 @@ const userSchema = new Schema(
     password: {
       type: String,
       minlength: 6,
-      maxlength: 16,
-      match: passwordRegexp,
       required: [true, "Set password for user"],
     },
 
@@ -43,7 +41,7 @@ const userSchema = new Schema(
     birthday: {
       type: String,
       match: birthdayRegexp,
-      defult: null,
+      default: null,
     },
 
     phone: {
