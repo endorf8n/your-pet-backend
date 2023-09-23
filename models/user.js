@@ -7,6 +7,7 @@ const {
   birthdayRegexp,
   phoneRegexp,
   cityRegexp,
+  defaultAvatar,
 } = require("../constants/user-constants");
 
 const userSchema = new Schema(
@@ -35,25 +36,25 @@ const userSchema = new Schema(
 
     avatarURL: {
       type: String,
-      default: "",
+      default: defaultAvatar,
     },
 
     birthday: {
       type: String,
       match: birthdayRegexp,
-      default: null,
+      default: "00-00-0000",
     },
 
     phone: {
       type: String,
       match: phoneRegexp,
-      default: null,
+      default: "+38000000000",
     },
 
     city: {
       type: String,
       match: cityRegexp,
-      default: null,
+      default: "",
     },
 
     // pet: {

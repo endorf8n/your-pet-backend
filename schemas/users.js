@@ -49,7 +49,7 @@ const userLoginSchema = Joi.object({
     }),
 });
 
-const userUpdateProfileSchema = Joi.object({
+const userEditProfileSchema = Joi.object({
   name: Joi.string(),
 
   email: Joi.string().pattern(emailRegexp).messages({
@@ -72,5 +72,5 @@ const userUpdateProfileSchema = Joi.object({
 module.exports = {
   userRegisterSchema,
   userLoginSchema,
-  userUpdateProfileSchema,
+  userEditProfileSchema,
 };
