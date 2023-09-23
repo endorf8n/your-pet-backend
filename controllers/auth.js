@@ -89,9 +89,12 @@ const editProfile = async (req, res) => {
   });
 };
 
+const getUserInfo = async (req, res) => {};
+
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
   logout: ctrlWrapper(logout),
   editProfile: ctrlWrapper(editProfile),
+  getUserInfo: ctrlWrapper(getUserInfo),
 };
