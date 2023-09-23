@@ -57,7 +57,6 @@ const noticeAddSchema = Joi.object({
       "any.required": "Date of birth pet is required",
     }),
   file: Joi.any()
-    .required()
     .messages({
       "any.required": "File is required",
     }),
@@ -81,6 +80,13 @@ const noticeAddSchema = Joi.object({
 });
 
 const noticeAddSellSchema = Joi.object({
+  price: Joi.string()
+  .required()
+  .invalid('0')
+  .messages({
+    'string.invalid': 'Price must not be 0',
+    "any.required": "Price pet is required",
+  }),
   category: Joi.string()
     .valid(...category)
     .required()
@@ -129,7 +135,6 @@ const noticeAddSellSchema = Joi.object({
       "any.required": "Date of birth pet is required",
     }),
   file: Joi.any()
-    .required()
     .messages({
       "any.required": "File is required",
     }),
@@ -147,14 +152,6 @@ const noticeAddSellSchema = Joi.object({
       "string.pattern.base":
         "Please enter the name of a city with a capital letter at the beginning.",
       "any.required": "Location pet is required",
-    }),
-  price: Joi.number()
-    .min(0.01)
-    .required()
-    .messages({
-      "number.base": "Price must be number",
-      'number.min': 'Price must be greater than zero',
-      'any.required': 'Price is required',
     }),
   comments: Joi.string().max(120)
 });

@@ -59,6 +59,7 @@ const noticeSchema = new Schema(
     },
     price: {
       type: Number,
+      min: 0,
       default: 0,
     },
     comments: {
@@ -66,9 +67,10 @@ const noticeSchema = new Schema(
       maxlength: 120,
       default: "",
     },
-    favorite: {
-      type: Boolean,
-      default: false,
+    favorites: {
+      type: [Schema.Types.ObjectId],
+      ref: "user",
+      default: [],
     },
     owner: {
       type: Schema.Types.ObjectId,

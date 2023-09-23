@@ -1,7 +1,8 @@
 const HttpError = require("./HttpError");
-const cloudinary = require("./cloudinary");
+const {cloudinary, cloudinaryUploader} = require("./cloudinary");
 
 module.exports = {
   HttpError,
   cloudinary,
+  cloudinaryUploader
 };
