@@ -4,7 +4,7 @@ const fs = require("fs/promises");
 
 const User = require("../models/user");
 
-const { HttpError, cloudinary } = require("../helpers");
+const { HttpError, cloudinaryUploader } = require("../helpers");
 const { ctrlWrapper } = require("../decorators");
 
 const { JWT_SECRET } = process.env;
@@ -58,25 +58,18 @@ const logout = async (req, res) => {
   res.status(204).json();
 };
 
-// const editProfile = async (req, res) => {
-//   const { _id } = req.user;
-//   const { path: oldPath, originalName } = req.file;
-//   const fileName = `${_id}-${originalname}`;
+const editProfile = async (req, res) => {
+  const { _id } = req.user;
+  const { path, filename } = req.file;
 
-//   const result = await cloudinary.uploader.upload(oldPath, {
-//     folder: "avatars",
-//     public_id: fileName,
-//   });
-//   const avatarURL = result.secure_url;
+  const avatarURL = await cloudinaryUploader(path, "avatars", filename);
 
-//   await fs.unlink(oldPath);
+  await User.findByIdAndUpdate(_id, { avatarURL });
 
-//   await User.findByIdAndUpdate(_id, { avatarURL });
-
-//   res.json({
-//     avatarURL,
-//   });
-// };
+  res.json({
+    avatarURL,
+  });
+};
 
 module.exports = {
   register: ctrlWrapper(register),
