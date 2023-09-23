@@ -30,4 +30,6 @@ router.patch(
   ctrl.editProfile
 );
 
+router.get("/current", authenticate, ctrl.getCurrent);
+
 module.exports = router;

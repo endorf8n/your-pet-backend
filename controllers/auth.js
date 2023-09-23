@@ -1,8 +1,8 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const fs = require("fs/promises");
 
 const User = require("../models/user");
+const Pet = require("../models/pet");
 
 const { HttpError, cloudinaryUploader } = require("../helpers");
 const { ctrlWrapper } = require("../decorators");
@@ -89,12 +89,29 @@ const editProfile = async (req, res) => {
   });
 };
 
-const getUserInfo = async (req, res) => {};
+const getCurrent = async (req, res) => {
+  const { _id: userId } = req.user;
+
+  const user = await User.findById(userId).select(
+    "-createdAt -updatedAt -id -token"
+  );
+  if (!user) {
+    throw new HttpError(404, `User with ${userId} not found`);
+  }
+  const pets = await Pet.find({ owner: userId }).select(
+    "-createdAt -updatedAt -owner -id"
+  );
+
+  res.json({
+    user,
+    pets,
+  });
+};
 
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
   logout: ctrlWrapper(logout),
   editProfile: ctrlWrapper(editProfile),
-  getUserInfo: ctrlWrapper(getUserInfo),
+  getCurrent: ctrlWrapper(getCurrent),
 };

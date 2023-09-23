@@ -3,7 +3,6 @@ const { Schema, model } = require("mongoose");
 const { handleValidateError, runUpdateValidators } = require("./hooks");
 const {
   emailRegexp,
-  passwordRegexp,
   birthdayRegexp,
   phoneRegexp,
   cityRegexp,
