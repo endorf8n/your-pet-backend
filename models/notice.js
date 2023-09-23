@@ -21,10 +21,10 @@ const noticeSchema = new Schema(
       minlength: 3,
       maxlength: 32,
       match: titleRegexp,
-      index: 1,
+      index: "text",
       required: [true, "Title notice is required"],
     },
-    name: {
+    name: { 
       type: String,
       minlength: 2,
       maxlength: 16,
