@@ -4,7 +4,7 @@ const ctrl = require("../../controllers/auth");
 
 const { validateBody } = require("../../decorators");
 
-const { authenticate } = require("../../middlewares");
+const { authenticate, upload } = require("../../middlewares");
 
 const schemas = require("../../schemas/users");
 
@@ -26,6 +26,7 @@ router.patch(
   "/edit-profile",
   authenticate,
   editProfileValidateMiddleware,
+  upload.single("avatar"),
   ctrl.editProfile
 );
 

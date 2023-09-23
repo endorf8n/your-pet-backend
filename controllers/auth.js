@@ -1,9 +1,10 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const fs = require("fs/promises");
 
 const User = require("../models/user");
 
-const { HttpError } = require("../helpers");
+const { HttpError, cloudinary } = require("../helpers");
 const { ctrlWrapper } = require("../decorators");
 
 const { JWT_SECRET } = process.env;
@@ -57,7 +58,25 @@ const logout = async (req, res) => {
   res.status(204).json();
 };
 
-const editProfile = async (req, res) => {};
+// const editProfile = async (req, res) => {
+//   const { _id } = req.user;
+//   const { path: oldPath, originalName } = req.file;
+//   const fileName = `${_id}-${originalname}`;
+
+//   const result = await cloudinary.uploader.upload(oldPath, {
+//     folder: "avatars",
+//     public_id: fileName,
+//   });
+//   const avatarURL = result.secure_url;
+
+//   await fs.unlink(oldPath);
+
+//   await User.findByIdAndUpdate(_id, { avatarURL });
+
+//   res.json({
+//     avatarURL,
+//   });
+// };
 
 module.exports = {
   register: ctrlWrapper(register),
