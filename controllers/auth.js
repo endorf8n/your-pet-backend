@@ -65,13 +65,17 @@ const editProfile = async (req, res) => {
   let avatarURL;
   if (req.file) {
     const { path, filename } = req.file;
-    const avatarURL = await cloudinaryUploader(path, "avatars", filename);
+    avatarURL = await cloudinaryUploader(path, "avatars", filename);
     userData.avatarURL = avatarURL;
   }
 
   const editedUser = await User.findByIdAndUpdate(_id, userData, {
     new: true,
   });
+
+  if (!editedUser) {
+    throw HttpError(404, `User with ${_id} not found`);
+  }
 
   const { name, email, phone, city, birthday } = editedUser;
 
