@@ -60,14 +60,28 @@ const logout = async (req, res) => {
 
 const editProfile = async (req, res) => {
   const { _id } = req.user;
-  const { path, filename } = req.file;
+  const userData = req.body;
 
-  const avatarURL = await cloudinaryUploader(path, "avatars", filename);
+  let avatarURL;
+  if (req.file) {
+    const { path, filename } = req.file;
+    const avatarURL = await cloudinaryUploader(path, "avatars", filename);
+    userData.avatarURL = avatarURL;
+  }
 
-  await User.findByIdAndUpdate(_id, { avatarURL });
+  const editedUser = await User.findByIdAndUpdate(_id, userData, {
+    new: true,
+  });
+
+  const { name, email, phone, city, birthday } = editedUser;
 
   res.json({
-    avatarURL,
+    name,
+    email,
+    phone,
+    city,
+    birthday,
+    avatarURL: avatarURL || editedUser.avatarURL,
   });
 };
 
