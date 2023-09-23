@@ -42,13 +42,13 @@ const userSchema = new Schema(
     birthday: {
       type: String,
       match: birthdayRegexp,
-      default: "00-00-0000",
+      default: null,
     },
 
     phone: {
       type: String,
       match: phoneRegexp,
-      default: "+38000000000",
+      default: "+380000000000",
     },
 
     city: {

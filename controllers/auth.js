@@ -4,7 +4,7 @@ const fs = require("fs/promises");
 
 const User = require("../models/user");
 
-const { HttpError, cloudinary } = require("../helpers");
+const { HttpError, cloudinaryUploader } = require("../helpers");
 const { ctrlWrapper } = require("../decorators");
 
 const { JWT_SECRET } = process.env;
@@ -58,29 +58,43 @@ const logout = async (req, res) => {
   res.status(204).json();
 };
 
-// const editProfile = async (req, res) => {
-//   const { _id } = req.user;
-//   const { path: oldPath, originalName } = req.file;
-//   const fileName = `${_id}-${originalname}`;
+const editProfile = async (req, res) => {
+  const { _id } = req.user;
+  const userData = req.body;
 
-//   const result = await cloudinary.uploader.upload(oldPath, {
-//     folder: "avatars",
-//     public_id: fileName,
-//   });
-//   const avatarURL = result.secure_url;
+  let avatarURL;
+  if (req.file) {
+    const { path, filename } = req.file;
+    avatarURL = await cloudinaryUploader(path, "avatars", filename);
+    userData.avatarURL = avatarURL;
+  }
 
-//   await fs.unlink(oldPath);
+  const editedUser = await User.findByIdAndUpdate(_id, userData, {
+    new: true,
+  });
 
-//   await User.findByIdAndUpdate(_id, { avatarURL });
+  if (!editedUser) {
+    throw HttpError(404, `User with ${_id} not found`);
+  }
 
-//   res.json({
-//     avatarURL,
-//   });
-// };
+  const { name, email, phone, city, birthday } = editedUser;
+
+  res.json({
+    name,
+    email,
+    phone,
+    city,
+    birthday,
+    avatarURL: avatarURL || editedUser.avatarURL,
+  });
+};
+
+const getUserInfo = async (req, res) => {};
 
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
   logout: ctrlWrapper(logout),
   editProfile: ctrlWrapper(editProfile),
+  getUserInfo: ctrlWrapper(getUserInfo),
 };
