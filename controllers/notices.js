@@ -2,18 +2,42 @@ const Notice = require("../models/notice");
 const { ctrlWrapper } = require("../decorators");
 const { noticeAddSchema, noticeAddSellSchema } = require("../schemas/notices");
 const { HttpError, cloudinaryUploader } = require("../helpers");
+const noticeConst = require("../constants/notice-constants");
 const fs = require("fs/promises");
 
-const getAllNotices = async (req, res, next) => {
-  const notices = await Notice.find();
-  res.status(200).json({ message: "your Notices", notices });
+const getNotices = async (req, res, next) => {
+  const { page = 1, limit = 12, category, searchQuery='' } = req.query;
+  const skip = (page - 1) * limit;
+
+  const serchConfigurations = {};
+
+  if (!noticeConst.category.includes(category)) {
+    throw HttpError(400, "Bad request, category must be sell, lost-found or in-good-hands")
+  }
+
+  if (searchQuery) {
+    serchConfigurations.title = { $regex: searchQuery, $options: 'i' };
+  }
+
+  serchConfigurations.category = category;
+
+  const notices = await Notice.find(serchConfigurations, "", { skip, limit });
+
+  if (!notices) {
+    throw HttpError(404, "Notices not found for your request");
+  }
+
+  res.status(200).json(notices);
 };
 
 const getNoticeById = async (req, res) => {
   const { noticeId } = req.params;
-  const notice = await Notice.findById(noticeId).populate("owner", "email");
+  const notice = await Notice.findById(noticeId, { favorites: 0 }).populate({
+    path: "owner",
+    select: { email: 1, phone: 1 },
+  });
   if (!notice) {
-    throw HttpError(404);
+    throw HttpError(404, "Notice not found");
   }
   res.status(200).json({
     notice,
@@ -25,14 +49,11 @@ const getUserNotices = async (req, res) => {
   const { page = 1, limit = 12 } = req.query;
   const skip = (page - 1) * limit;
 
-  const notices = await Notice.find({ owner }, "", { skip, limit }).populate(
-    "owner",
-    "email"
-  );
+  const notices = await Notice.find({ owner }, "", { skip, limit });
   if (!notices) {
-    throw HttpError(404);
+    throw HttpError(404, "Your notice not found, please add your first notice");
   }
-  res.status(200).json({page, limit, total: notices.length, notices});
+  res.status(200).json({ page, limit, total: notices.length, notices });
 };
 
 const addNotice = async (req, res) => {
@@ -75,7 +96,7 @@ const updateNoticeFavorites = async (req, res) => {
     }
   );
   if (!notice) {
-    throw HttpError(404);
+    throw HttpError(404, "Notice not found");
   }
   res.status(200).json(notice);
 };
@@ -90,9 +111,9 @@ const getNoticesInFavorites = async (req, res) => {
     limit,
   }).populate({ path: "favorites", select: "email" });
   if (!notices) {
-    throw HttpError(404);
+    throw HttpError(404, "Notices not found, please add your first notice to favorites list");
   }
-  res.status(200).json({page, limit, total: notices.length, notices});
+  res.status(200).json({ page, limit, total: notices.length, notices });
 };
 
 const removeNoticeFavorites = async (req, res) => {
@@ -106,31 +127,31 @@ const removeNoticeFavorites = async (req, res) => {
     }
   );
   if (!notice) {
-    throw HttpError(404);
+    throw HttpError(404, "Notice not found");
   }
   res.status(200).json(notice);
-}
+};
 
 const removeNotice = async (req, res) => {
   const { noticeId } = req.params;
   const { _id: owner } = req.user;
   const notice = await Notice.findById(noticeId);
   if (!notice) {
-    throw HttpError(404);
+    throw HttpError(404, "Notice not found");
   }
 
   if (notice.owner.toString() !== owner.toString()) {
-    throw HttpError(403, 'You are not allowed to delete this notice')
+    throw HttpError(403, "You are not allowed to delete this notice");
   }
   await Notice.findByIdAndDelete(noticeId);
 
   res.status(200).json({
-    message: 'Success your notice deleted'
-  })
-}
+    message: "Success your notice deleted",
+  });
+};
 
 module.exports = {
-  getAllNotices: ctrlWrapper(getAllNotices),
+  getNotices: ctrlWrapper(getNotices),
   addNotice: ctrlWrapper(addNotice),
   getNoticeById: ctrlWrapper(getNoticeById),
   updateNoticeFavorites: ctrlWrapper(updateNoticeFavorites),

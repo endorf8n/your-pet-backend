@@ -17,8 +17,8 @@ const noticeAddSchema = Joi.object({
       "any.required": "Category pet is required",
     }),
   title: Joi.string()
-    .min(3)
-    .max(32)
+    .min(4)
+    .max(64)
     .pattern(titleRegexp)
     .required()
     .messages({
