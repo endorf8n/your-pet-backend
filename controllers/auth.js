@@ -1,5 +1,6 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const mongoose = require("mongoose");
 
 const User = require("../models/user");
 const Pet = require("../models/pet");
@@ -99,20 +100,48 @@ const editProfile = async (req, res) => {
 const getCurrent = async (req, res) => {
   const { _id: userId } = req.user;
 
-  const user = await User.findById(userId).select(
-    "-createdAt -updatedAt -token"
-  );
-  if (!user) {
-    throw new HttpError(404, `User with ${userId} not found`);
-  }
-  const pets = await Pet.find({ owner: userId }).select(
-    "-createdAt -updatedAt -owner"
-  );
+  const userData = await User.aggregate([
+    { $match: { _id: userId } },
+    {
+      $lookup: {
+        from: "pets",
+        localField: "_id",
+        foreignField: "owner",
+        as: "pets",
+      },
+    },
+    {
+      $project: {
+        _id: 1,
+        name: 1,
+        email: 1,
+        password: 1,
+        avatarURL: 1,
+        birthday: 1,
+        phone: 1,
+        city: 1,
+        pets: {
+          $map: {
+            input: "$pets",
+            as: "pet",
+            in: {
+              _id: "$$pet._id",
+              name: "$$pet.name",
+              dateOfBirth: "$$pet.dateOfBirth",
+              type: "$$pet.type",
+              comments: "$$pet.comments",
+              petURL: "$$pet.petURL",
+            },
+          },
+        },
+      },
+    },
+  ]);
 
-  res.json({
-    user,
-    pets,
-  });
+  const result = {
+    user: userData[0],
+  };
+  res.json(result);
 };
 
 module.exports = {
