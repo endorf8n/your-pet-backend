@@ -62,6 +62,13 @@ const editProfile = async (req, res) => {
   const { _id } = req.user;
   const userData = req.body;
 
+  if (userData.email && userData.email !== req.user.email) {
+    const existingUser = await User.findOne({ email: userData.email });
+    if (existingUser) {
+      throw HttpError(409, "Email is already in use");
+    }
+  }
+
   let avatarURL;
   if (req.file) {
     const { path, filename } = req.file;
@@ -93,13 +100,13 @@ const getCurrent = async (req, res) => {
   const { _id: userId } = req.user;
 
   const user = await User.findById(userId).select(
-    "-createdAt -updatedAt -id -token"
+    "-createdAt -updatedAt -token"
   );
   if (!user) {
     throw new HttpError(404, `User with ${userId} not found`);
   }
   const pets = await Pet.find({ owner: userId }).select(
-    "-createdAt -updatedAt -owner -id"
+    "-createdAt -updatedAt -owner"
   );
 
   res.json({

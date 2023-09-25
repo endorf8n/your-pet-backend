@@ -4,6 +4,6 @@ const ctrl = require("../../controllers/friends");
 
 const router = express.Router();
 
-router.get("/getAll", ctrl.getFriends);
+router.get("/", ctrl.getFriends);
 
 module.exports = router;

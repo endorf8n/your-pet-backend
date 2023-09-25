@@ -38,9 +38,10 @@ const addPet = async (req, res) => {
     throw HttpError(404);
   }
 
-  const { name, dateOfBirth, type, comments } = result;
+  const { name, dateOfBirth, type, comments, _id } = result;
 
   res.status(201).json({
+    _id,
     name,
     dateOfBirth,
     type,
