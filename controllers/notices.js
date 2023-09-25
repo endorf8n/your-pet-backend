@@ -3,42 +3,41 @@ const { ctrlWrapper } = require("../decorators");
 const { noticeAddSchema, noticeAddSellSchema } = require("../schemas/notices");
 const { HttpError, cloudinaryUploader } = require("../helpers");
 const noticeConst = require("../constants/notice-constants");
-const fs = require("fs/promises");
 
-const getNotices = async (req, res, next) => {
+const getNotices = async (req, res) => {
   const { page = 1, limit = 12, category, searchQuery='' } = req.query;
   const skip = (page - 1) * limit;
-
-  const serchConfigurations = {};
+  const searchConfigurations = {};
+  const score = {};
 
   if (!noticeConst.category.includes(category)) {
     throw HttpError(400, "Bad request, category must be sell, lost-found or in-good-hands")
   }
-
   if (searchQuery) {
-    serchConfigurations.title = { $regex: searchQuery, $options: 'i' };
+    // serchConfigurations.title = { $regex: searchQuery, $options: 'i' };
+    searchConfigurations["$text"] = { $search: searchQuery };
+    score.score = { $meta: "textScore" };
   }
+  searchConfigurations.category = category;
 
-  serchConfigurations.category = category;
-
-  const notices = await Notice.find(serchConfigurations, "", { skip, limit });
-
-  if (!notices) {
+  const notices = await Notice.find(searchConfigurations, score, { skip, limit, }).sort({...score, createdAt: -1});
+  if (notices.length === 0) {
     throw HttpError(404, "Notices not found for your request");
   }
 
-  res.status(200).json(notices);
+  res.status(200).json({ page, limit, total: notices.length, notices});
 };
 
 const getNoticeById = async (req, res) => {
   const { noticeId } = req.params;
-  const notice = await Notice.findById(noticeId, { favorites: 0 }).populate({
+  const notice = await Notice.findById(noticeId).populate({
     path: "owner",
     select: { email: 1, phone: 1 },
   });
   if (!notice) {
     throw HttpError(404, "Notice not found");
   }
+
   res.status(200).json({
     notice,
   });
@@ -49,10 +48,11 @@ const getUserNotices = async (req, res) => {
   const { page = 1, limit = 12 } = req.query;
   const skip = (page - 1) * limit;
 
-  const notices = await Notice.find({ owner }, "", { skip, limit });
+  const notices = await Notice.find({ owner }, "", { skip, limit }).sort({ createdAt: -1 });
   if (!notices) {
     throw HttpError(404, "Your notice not found, please add your first notice");
   }
+
   res.status(200).json({ page, limit, total: notices.length, notices });
 };
 
@@ -73,6 +73,7 @@ const addNotice = async (req, res) => {
       file,
       owner,
     });
+
     res.status(201).json(notice);
   }
 
@@ -82,12 +83,14 @@ const addNotice = async (req, res) => {
   }
   const file = await cloudinaryUploader(path, "pets", filename);
   const notice = await Notice.create({ ...req.body, file, owner });
+
   res.status(201).json(notice);
 };
 
 const updateNoticeFavorites = async (req, res) => {
   const { noticeId } = req.params;
   const { _id } = req.user;
+
   const notice = await Notice.findByIdAndUpdate(
     noticeId,
     { $addToSet: { favorites: _id } },
@@ -98,6 +101,23 @@ const updateNoticeFavorites = async (req, res) => {
   if (!notice) {
     throw HttpError(404, "Notice not found");
   }
+
+  res.status(200).json(notice);
+};
+
+const removeNoticeFavorites = async (req, res) => {
+  const { noticeId } = req.params;
+  const { _id } = req.user;
+
+  const notice = await Notice.findByIdAndUpdate(
+    noticeId,
+    { $pull: { favorites: _id } },
+    { new: true, }
+  );
+  if (!notice) {
+    throw HttpError(404, "Notice not found");
+  }
+
   res.status(200).json(notice);
 };
 
@@ -109,32 +129,19 @@ const getNoticesInFavorites = async (req, res) => {
   const notices = await Notice.find({ favorites: { $in: [_id] } }, "", {
     skip,
     limit,
-  }).populate({ path: "favorites", select: "email" });
+  })
+  
   if (!notices) {
     throw HttpError(404, "Notices not found, please add your first notice to favorites list");
   }
-  res.status(200).json({ page, limit, total: notices.length, notices });
-};
 
-const removeNoticeFavorites = async (req, res) => {
-  const { noticeId } = req.params;
-  const { _id } = req.user;
-  const notice = await Notice.findByIdAndUpdate(
-    noticeId,
-    { $pull: { favorites: _id } },
-    {
-      new: true,
-    }
-  );
-  if (!notice) {
-    throw HttpError(404, "Notice not found");
-  }
-  res.status(200).json(notice);
+  res.status(200).json({ page, limit, total: notices.length, notices });
 };
 
 const removeNotice = async (req, res) => {
   const { noticeId } = req.params;
   const { _id: owner } = req.user;
+
   const notice = await Notice.findById(noticeId);
   if (!notice) {
     throw HttpError(404, "Notice not found");

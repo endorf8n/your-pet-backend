@@ -57,6 +57,7 @@ const noticeAddSchema = Joi.object({
       "any.required": "Date of birth pet is required",
     }),
   file: Joi.any()
+    .required()
     .messages({
       "any.required": "File is required",
     }),
