@@ -11,14 +11,6 @@ const addPet = async (req, res) => {
   if (!body) {
     throw HttpError(400);
   }
-  const { name: petName } = body;
-  const pet = await Pet.findOne({ name: petName });
-  if (pet) {
-    throw HttpError(
-      409,
-      "A pet with this name has already been added to your list"
-    );
-  }
 
   let petURL = "";
 
