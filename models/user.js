@@ -55,18 +55,6 @@ const userSchema = new Schema(
       match: cityRegexp,
       default: "",
     },
-
-    // pet: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: "pet",
-    //   default: [],
-    // },
-
-    // notice: {
-    //   type: Schema.Types.ObjectId,
-    //   ref: "notice",
-    //   default: [],
-    // },
   },
   { versionKey: false, timestamps: true }
 );
