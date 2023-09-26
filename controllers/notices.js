@@ -5,27 +5,39 @@ const { HttpError, cloudinaryUploader } = require("../helpers");
 const noticeConst = require("../constants/notice-constants");
 
 const getNotices = async (req, res) => {
-  const { page = 1, limit = 12, category, searchQuery='' } = req.query;
+  const { page = 1, limit = 12, category, searchQuery = "" } = req.query;
   const skip = (page - 1) * limit;
   const searchConfigurations = {};
   const score = {};
 
   if (!noticeConst.category.includes(category)) {
-    throw HttpError(400, "Bad request, category must be sell, lost-found or in-good-hands")
-  }
-  if (searchQuery) {
-    // serchConfigurations.title = { $regex: searchQuery, $options: 'i' };
-    searchConfigurations["$text"] = { $search: searchQuery };
-    score.score = { $meta: "textScore" };
+    throw HttpError(
+      400,
+      "Bad request, category must be sell, lost-found or in-good-hands"
+    );
   }
   searchConfigurations.category = category;
 
-  const notices = await Notice.find(searchConfigurations, score, { skip, limit, }).sort({...score, createdAt: -1});
-  if (notices.length === 0) {
-    throw HttpError(404, "Notices not found for your request");
+  if (searchQuery) {
+    searchConfigurations["$text"] = { $search: searchQuery };
+    score.score = { $meta: "textScore" };
   }
+  
+  const total = await Notice.countDocuments(searchConfigurations);
+  const totalPages = Math.ceil(total / limit);
+  if (total === 0 || page > totalPages ) {
+    throw HttpError(404, "Noties not found for your request")
+  }
+  
+  const notices = await Notice.find(searchConfigurations, score, {
+    skip,
+    limit,
+  }).populate({
+    path: "owner",
+    select: { email: 1, phone: 1 },
+  }).sort({ ...score, createdAt: -1 });
 
-  res.status(200).json({ page, limit, total: notices.length, notices});
+  res.status(200).json({ page, limit, total, totalPages, notices });
 };
 
 const getNoticeById = async (req, res) => {
@@ -48,12 +60,17 @@ const getUserNotices = async (req, res) => {
   const { page = 1, limit = 12 } = req.query;
   const skip = (page - 1) * limit;
 
-  const notices = await Notice.find({ owner }, "", { skip, limit }).sort({ createdAt: -1 });
-  if (!notices) {
-    throw HttpError(404, "Your notice not found, please add your first notice");
+  const total = await Notice.countDocuments({ owner });
+  const totalPages = Math.ceil(total / limit);
+  if (total === 0 || page > totalPages) {
+    throw HttpError(404, "Your notice not found for your request");
   }
 
-  res.status(200).json({ page, limit, total: notices.length, notices });
+  const notices = await Notice.find({ owner }, "", { skip, limit }).sort({
+    createdAt: -1,
+  });
+
+  res.status(200).json({ page, limit, total, totalPages, notices });
 };
 
 const addNotice = async (req, res) => {
@@ -112,7 +129,7 @@ const removeNoticeFavorites = async (req, res) => {
   const notice = await Notice.findByIdAndUpdate(
     noticeId,
     { $pull: { favorites: _id } },
-    { new: true, }
+    { new: true }
   );
   if (!notice) {
     throw HttpError(404, "Notice not found");
@@ -126,16 +143,18 @@ const getNoticesInFavorites = async (req, res) => {
   const { page = 1, limit = 12 } = req.query;
   const skip = (page - 1) * limit;
 
+  const total = await Notice.countDocuments({ favorites: { $in: [_id] } });
+  const totalPages = Math.ceil(total / limit);
+  if (total === 0 || page > totalPages) {
+    throw HttpError(404, "Your notice not found for your request");
+  }
+
   const notices = await Notice.find({ favorites: { $in: [_id] } }, "", {
     skip,
     limit,
-  })
-  
-  if (!notices) {
-    throw HttpError(404, "Notices not found, please add your first notice to favorites list");
-  }
+  });
 
-  res.status(200).json({ page, limit, total: notices.length, notices });
+  res.status(200).json({ page, limit, total, totalPages, notices });
 };
 
 const removeNotice = async (req, res) => {

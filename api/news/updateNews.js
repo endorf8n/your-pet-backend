@@ -19,7 +19,7 @@ const getNews = async (page) => {
     const response = await axios.get(`/news/top?page=${page}`, options);
     return response.data.data;
   } catch (error) {
-    console.log(error.message);
+    throw new Error(error.message);
   }
 };
 
@@ -31,28 +31,45 @@ const fetchAllNews = async () => {
   }
   try {
     const allNews = await Promise.all(promises);
-
     allNews.forEach((news) => {
       finalNews.push(...news);
     });
-
+    
     console.log(finalNews);
     return finalNews;
   } catch (error) {
-    console.log(error.message);
+    throw new Error(error.message);
   }
 };
 
 const updateNews = async () => {
   try {
-    await New.deleteMany();
     const news = await fetchAllNews();
-    await New.insertMany(news);
+    if (news.length === 0) {
+      throw new Error("No news fetched. Update canceled.");
+    }
 
-    console.log(news);
-    console.log("Upate news done!");
+    const allHaveRequiredFields = news.every(
+      (item) =>
+        item.uuid &&
+        item.title &&
+        item.description &&
+        item.url &&
+        item.image_url &&
+        item.published_at
+    );
+
+    if (!allHaveRequiredFields) {
+      throw new Error(
+        "Not all news items have all required fields. Update canceled."
+      );
+    }
+
+    await New.deleteMany();
+    await New.insertMany(news);
+    console.log("Update news done!");
   } catch (error) {
-    console.log(error.message);
+    throw new Error(error.message);
   }
 };
 

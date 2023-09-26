@@ -9,11 +9,13 @@ const newSchema = new Schema(
     },
     title: {
       type: String,
+      index: "text",
       required: [true, "Title news is required"],
     },
     description: {
       type: String,
       required: [true, "Description news is required"],
+      default: "",
     },
     keywords: {
       type: String,
