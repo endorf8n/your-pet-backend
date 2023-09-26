@@ -73,7 +73,7 @@ const editProfile = async (req, res) => {
   let avatarURL;
   if (req.file) {
     const { path, filename } = req.file;
-    avatarURL = await cloudinaryUploader(path, "avatars", filename);
+    avatarURL = await cloudinaryUploader(path, "avatars", filename, 182, 182);
     userData.avatarURL = avatarURL;
   }
 

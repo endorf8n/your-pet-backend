@@ -10,25 +10,31 @@ cloudinary.config({
   api_secret: CLOUDINARY_API_SECRET,
 });
 
-const cloudinaryUploader = async (path, folders='', filename) => {
+const cloudinaryUploader = async (
+  path,
+  folders = "",
+  filename,
+  width = 300,
+  height = 300
+) => {
   const { url } = await cloudinary.uploader.upload(path, {
     folder: folders,
     public_id: filename,
     quality_analysis: true,
     transformation: [
       {
-        width: 300,
-        height: 300,
+        width,
+        height,
         gravity: "auto",
-        crop: "fill"
+        crop: "fill",
       },
-      {fetch_format: "auto"}
-    ]
-  })
+      { fetch_format: "auto" },
+    ],
+  });
   await fs.unlink(path);
 
   return url;
-}
+};
 
 module.exports = {
   cloudinary,
