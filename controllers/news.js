@@ -3,14 +3,29 @@ const { ctrlWrapper } = require("../decorators");
 const { HttpError } = require("../helpers");
 
 const getNews = async (req, res) => {
-  const news = await New.find(
-    {},
-    { uuid: 1, title: 1, description: 1, url: 1, image_url: 1, published_at: 1 }
-  ).sort({ published_at: -1 });
-  if (news.length === 0) {
-    throw HttpError(404, "Sorry, news not found");
+  const { page = 1, limit = 6, searchQuery = "" } = req.query;
+  const skip = (page - 1) * limit;
+  const searchConfigurations = {};
+  const score = {};
+
+  if (searchQuery) {
+    searchConfigurations["$text"] = { $search: searchQuery };
+    score.score = { $meta: "textScore" };
   }
-  res.status(200).json(news);
+
+  const total = await New.countDocuments(searchConfigurations);
+  const totalPages = Math.ceil(total / limit);
+  if (total === 0 || page > totalPages ) {
+    throw HttpError(404, "News not found for your request")
+  }
+
+  const news = await New.find(searchConfigurations, score)
+    .select("uuid title description url image_url published_at")
+    .skip(skip)
+    .limit(limit)
+    .sort({ ...score, published_at: -1 });
+  
+  res.status(200).json({ page, limit, total, totalPages, news});
 };
 
 module.exports = {
