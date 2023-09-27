@@ -4,7 +4,13 @@ const axios = require("axios");
 const URL = require("url");
 // const queryString = require("query-string");
 const User = require("../models/user");
-const { HttpError, cloudinaryUploader } = require("../helpers");
+const Pet = require("../models/pet");
+const {
+  HttpError,
+  cloudinaryUploader,
+  cloudinaryRemover,
+  getPublicId,
+} = require("../helpers");
 const { ctrlWrapper } = require("../decorators");
 
 const { JWT_SECRET, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET_KEY, LOCAL_URL } =
@@ -73,7 +79,7 @@ const editProfile = async (req, res) => {
   let avatarURL;
   if (req.file) {
     const { path, filename } = req.file;
-    avatarURL = await cloudinaryUploader(path, "avatars", filename);
+    avatarURL = await cloudinaryUploader(path, "avatars", filename, 182, 182);
     userData.avatarURL = avatarURL;
   }
 
@@ -85,6 +91,10 @@ const editProfile = async (req, res) => {
     throw HttpError(404, `User with ${_id} not found`);
   }
 
+  if (req.user.avatarURL) {
+    const public_id = getPublicId(req.user.avatarURL);
+    await cloudinaryRemover(public_id, "avatars");
+  }
   const { name, email, phone, city, birthday } = editedUser;
 
   res.json({

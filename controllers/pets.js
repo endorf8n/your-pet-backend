@@ -1,6 +1,11 @@
 const Pet = require("../models/pet");
 
-const { HttpError, cloudinaryUploader } = require("../helpers");
+const {
+  HttpError,
+  cloudinaryUploader,
+  cloudinaryRemover,
+  getPublicId,
+} = require("../helpers");
 const { ctrlWrapper } = require("../decorators");
 
 const addPet = async (req, res) => {
@@ -16,7 +21,7 @@ const addPet = async (req, res) => {
 
   if (req.file) {
     const { path, filename } = req.file;
-    petURL = await cloudinaryUploader(path, "owner-pets", filename);
+    petURL = await cloudinaryUploader(path, "owner-pets", filename, 161, 161);
   }
   const data = {
     ...body,
@@ -45,9 +50,16 @@ const addPet = async (req, res) => {
 const deleteById = async (req, res) => {
   const { petId } = req.params;
   const result = await Pet.findByIdAndDelete(petId);
+
   if (!result) {
     throw HttpError(404, `Pet with ${petId} not found`);
   }
+
+  if (result.petURL) {
+    const public_id = getPublicId(result.petURL);
+    await cloudinaryRemover(public_id, "owner-pets");
+  }
+
   res.json({
     message: "Pet information deleted",
   });
