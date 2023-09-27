@@ -1,7 +1,12 @@
 const Notice = require("../models/notice");
 const { ctrlWrapper } = require("../decorators");
 const { noticeAddSchema, noticeAddSellSchema } = require("../schemas/notices");
-const { HttpError, cloudinaryUploader } = require("../helpers");
+const {
+  HttpError,
+  cloudinaryUploader,
+  cloudinaryRemover,
+  getPublicId,
+} = require("../helpers");
 const noticeConst = require("../constants/notice-constants");
 
 const getNotices = async (req, res) => {
@@ -22,20 +27,22 @@ const getNotices = async (req, res) => {
     searchConfigurations["$text"] = { $search: searchQuery };
     score.score = { $meta: "textScore" };
   }
-  
+
   const total = await Notice.countDocuments(searchConfigurations);
   const totalPages = Math.ceil(total / limit);
-  if (total === 0 || page > totalPages ) {
-    throw HttpError(404, "Noties not found for your request")
+  if (total === 0 || page > totalPages) {
+    throw HttpError(404, "Noties not found for your request");
   }
-  
+
   const notices = await Notice.find(searchConfigurations, score, {
     skip,
     limit,
-  }).populate({
-    path: "owner",
-    select: { email: 1, phone: 1 },
-  }).sort({ ...score, createdAt: -1 });
+  })
+    .populate({
+      path: "owner",
+      select: { email: 1, phone: 1 },
+    })
+    .sort({ ...score, createdAt: -1 });
 
   res.status(200).json({ page, limit, total, totalPages, notices });
 };
@@ -170,6 +177,11 @@ const removeNotice = async (req, res) => {
     throw HttpError(403, "You are not allowed to delete this notice");
   }
   await Notice.findByIdAndDelete(noticeId);
+
+  if (notice.file) {
+    const public_id = getPublicId(notice.file);
+    await cloudinaryRemover(public_id, "pets");
+  }
 
   res.status(200).json({
     message: "Success your notice deleted",
