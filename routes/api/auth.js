@@ -15,6 +15,9 @@ const loginValidateMiddleware = validateBody(schemas.userLoginSchema);
 const editProfileValidateMiddleware = validateBody(
   schemas.userEditProfileSchema
 );
+router.get('/google', ctrl.googleAuth);
+
+router.get('/google-redirect', ctrl.googleRedirect);
 
 router.post("/register", registerValidateMiddleware, ctrl.register);
 
