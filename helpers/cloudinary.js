@@ -36,7 +36,24 @@ const cloudinaryUploader = async (
   return url;
 };
 
+const getPublicId = (avatarURL) => {
+  const parts = avatarURL.split("/");
+  const fileWithExtension = parts[parts.length - 1];
+  const public_id = fileWithExtension.split(".").slice(0, -1).join(".");
+  return public_id;
+};
+
+const cloudinaryRemover = async (public_id, folder = "") => {
+  await cloudinary.uploader.destroy(`${folder}/${public_id}`, {
+    invalidate: true,
+    type: "upload",
+    resource_type: "image",
+  });
+};
+
 module.exports = {
   cloudinary,
   cloudinaryUploader,
+  cloudinaryRemover,
+  getPublicId,
 };
