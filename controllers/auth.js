@@ -1,14 +1,14 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
-const mongoose = require("mongoose");
-
+const axios = require("axios");
+const URL = require("url");
+// const queryString = require("query-string");
 const User = require("../models/user");
-const Pet = require("../models/pet");
-
 const { HttpError, cloudinaryUploader } = require("../helpers");
 const { ctrlWrapper } = require("../decorators");
 
-const { JWT_SECRET } = process.env;
+const { JWT_SECRET, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET_KEY, LOCAL_URL } =
+  process.env;
 
 const register = async (req, res) => {
   const { email, password } = req.body;
@@ -144,10 +144,42 @@ const getCurrent = async (req, res) => {
   res.json(result);
 };
 
+const googleAuth = async (req, res) => {
+  const stringifiedParams = queryString.stringify({
+    client_id: OAUTH_CLIENT_ID,
+    redirect_uri: `${LOCAL_URL}/api/users/google-redirect`,
+    scope: [
+      'https://www.googleapis.com/auth/userinfo.email',
+      'https://www.googleapis.com/auth/userinfo.profile',
+    ].join(' '),
+    response_type: 'code',
+    access_type: 'offline',
+    prompt: "consent",
+  });
+
+  return res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${stringifiedParams}`);
+};
+
+const googleRedirect = async (req, res) => {
+  const fullUrl = `${req.protocol}://${req.host}${req.originalUrl}` // req.host 19-53 video
+  const urlObj = new URL(fullUrl);
+  const urlParams = queryString.parse(urlObj.search);
+  console.log(urlParams);
+
+  const code = urlParams.code;
+  console.log(code);
+
+  const tokenData = await axios({
+    url: ''
+  })
+};
+
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
   logout: ctrlWrapper(logout),
   editProfile: ctrlWrapper(editProfile),
   getCurrent: ctrlWrapper(getCurrent),
+  googleAuth: ctrlWrapper(googleAuth),
+  googleRedirect: ctrlWrapper(googleRedirect),
 };

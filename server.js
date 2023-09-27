@@ -17,7 +17,7 @@ mongoose
         console.log('Failed to update news:');
         setTimeout(() => {
           console.log('Retrying update in 1 minute...');
-          cron.schedule('30 * * * *', async () => {
+          cron.schedule('* * * * *', async () => {
             try {
               console.log('Retrying update...');
               await updateNews();
