@@ -41,8 +41,7 @@ const userSchema = new Schema(
     },
 
     birthday: {
-      type: String,
-      match: birthdayRegexp,
+      type: Date,
       default: null,
     },
 
