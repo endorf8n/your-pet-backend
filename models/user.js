@@ -33,6 +33,8 @@ const userSchema = new Schema(
 
     token: String,
 
+    refreshToken: String,
+
     avatarURL: {
       type: String,
       default: defaultAvatar,

@@ -13,8 +13,13 @@ const {
 } = require("../helpers");
 const { ctrlWrapper } = require("../decorators");
 
-const { JWT_SECRET, OAUTH_CLIENT_ID, OAUTH_CLIENT_SECRET_KEY, LOCAL_URL } =
-  process.env;
+const {
+  JWT_SECRET,
+  JWT_REFRESH_TOKEN,
+  OAUTH_CLIENT_ID,
+  OAUTH_CLIENT_SECRET_KEY,
+  LOCAL_URL,
+} = process.env;
 
 const register = async (req, res) => {
   const { email, password } = req.body;
@@ -50,9 +55,17 @@ const login = async (req, res) => {
   };
 
   const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
-  await User.findByIdAndUpdate(user._id, { token });
+  const refreshToken = jwt.sign(payload, JWT_REFRESH_TOKEN, {
+    expiresIn: "30d",
+  });
 
+  await User.findByIdAndUpdate(user._id, { token, refreshToken });
+  res.cookie("refreshToken", refreshToken, {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  });
   res.json({
+    refreshToken,
     token,
     name: user.name,
   });
@@ -60,7 +73,9 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
   const { _id } = req.user;
-  await User.findByIdAndUpdate(_id, { token: "" });
+
+  await User.findByIdAndUpdate(_id, { token: "", refreshToken: "" });
+  res.clearCookie("refreshToken");
 
   res.status(204).json();
 };
@@ -159,19 +174,21 @@ const googleAuth = async (req, res) => {
     client_id: OAUTH_CLIENT_ID,
     redirect_uri: `${LOCAL_URL}/api/users/google-redirect`,
     scope: [
-      'https://www.googleapis.com/auth/userinfo.email',
-      'https://www.googleapis.com/auth/userinfo.profile',
-    ].join(' '),
-    response_type: 'code',
-    access_type: 'offline',
+      "https://www.googleapis.com/auth/userinfo.email",
+      "https://www.googleapis.com/auth/userinfo.profile",
+    ].join(" "),
+    response_type: "code",
+    access_type: "offline",
     prompt: "consent",
   });
 
-  return res.redirect(`https://accounts.google.com/o/oauth2/v2/auth?${stringifiedParams}`);
+  return res.redirect(
+    `https://accounts.google.com/o/oauth2/v2/auth?${stringifiedParams}`
+  );
 };
 
 const googleRedirect = async (req, res) => {
-  const fullUrl = `${req.protocol}://${req.host}${req.originalUrl}` // req.host 19-53 video
+  const fullUrl = `${req.protocol}://${req.host}${req.originalUrl}`; // req.host 19-53 video
   const urlObj = new URL(fullUrl);
   const urlParams = queryString.parse(urlObj.search);
   console.log(urlParams);
@@ -180,9 +197,11 @@ const googleRedirect = async (req, res) => {
   console.log(code);
 
   const tokenData = await axios({
-    url: ''
-  })
+    url: "",
+  });
 };
+
+const refreshToken = async (req, res) => {};
 
 module.exports = {
   register: ctrlWrapper(register),
@@ -192,4 +211,5 @@ module.exports = {
   getCurrent: ctrlWrapper(getCurrent),
   googleAuth: ctrlWrapper(googleAuth),
   googleRedirect: ctrlWrapper(googleRedirect),
+  refreshToken: ctrlWrapper(refreshToken),
 };
