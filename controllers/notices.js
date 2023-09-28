@@ -1,6 +1,10 @@
 const Notice = require("../models/notice");
 const { ctrlWrapper } = require("../decorators");
-const { noticeAddSchema, noticeAddSellSchema } = require("../schemas/notices");
+const {
+  noticeAddSchema,
+  noticeAddSellSchema,
+  noticesGetSchema,
+} = require("../schemas/notices");
 const {
   HttpError,
   cloudinaryUploader,
@@ -8,30 +12,53 @@ const {
   getPublicId,
 } = require("../helpers");
 const noticeConst = require("../constants/notice-constants");
+const { countPetAge, formattedDate, normalizedDate } = require("../helpers");
 
 const getNotices = async (req, res) => {
-  const { page = 1, limit = 12, category, searchQuery = "" } = req.query;
+  const {
+    page = 1,
+    limit = 12,
+    category,
+    searchQuery = "",
+    age,
+    sex,
+  } = req.query;
   const skip = (page - 1) * limit;
   const searchConfigurations = {};
   const score = {};
 
-  if (!noticeConst.category.includes(category)) {
-    throw HttpError(
-      400,
-      "Bad request, category must be sell, lost-found or in-good-hands"
-    );
+  const { error } = noticesGetSchema.validate(req.query);
+  if (error) {
+    throw HttpError(400, error.message);
   }
-  searchConfigurations.category = category;
+
+  if (sex) {
+    searchConfigurations.sex = sex;
+  }
 
   if (searchQuery) {
     searchConfigurations["$text"] = { $search: searchQuery };
     score.score = { $meta: "textScore" };
   }
 
+  if (age) {
+    const ageValue = Number(age);
+
+    if (!Number.isNaN(ageValue) && ageValue >= 0) {
+      const ageFilter =
+        ageValue <= 1 ? { $lte: 1 } : ageValue <= 2 ? { $lte: 2 } : { $gt: 2 };
+      searchConfigurations.age = ageFilter;
+    } else {
+      throw HttpError(400, "Bad request, age must be a non-negative number");
+    }
+  }
+
+  searchConfigurations.category = category;
+
   const total = await Notice.countDocuments(searchConfigurations);
   const totalPages = Math.ceil(total / limit);
   if (total === 0 || page > totalPages) {
-    throw HttpError(404, "Noties not found for your request");
+    throw HttpError(404, "Notiсes not found for your request");
   }
 
   const notices = await Notice.find(searchConfigurations, score, {
@@ -49,7 +76,7 @@ const getNotices = async (req, res) => {
 
 const getNoticeById = async (req, res) => {
   const { noticeId } = req.params;
-  const notice = await Notice.findById(noticeId).populate({
+  const notice = await Notice.findById(noticeId, { age: 0 }).populate({
     path: "owner",
     select: { email: 1, phone: 1 },
   });
@@ -57,8 +84,11 @@ const getNoticeById = async (req, res) => {
     throw HttpError(404, "Notice not found");
   }
 
+  const formatDate = formattedDate(notice.date);
+
   res.status(200).json({
     notice,
+    formatDate,
   });
 };
 
@@ -82,32 +112,49 @@ const getUserNotices = async (req, res) => {
 
 const addNotice = async (req, res) => {
   const { _id: owner } = req.user;
-  const { category, price } = req.body;
+  const { category, price, date } = req.body;
+  let noticeData = {};
+
+  if (!req.file) {
+    throw HttpError(400, "Bad request, image file is required");
+  }
   const { path, filename } = req.file;
+
+  if (!noticeConst.category.includes(category)) {
+    throw HttpError(
+      400,
+      "Bad request, category must be sell, lost-found or in-good-hands"
+    );
+  }
 
   if (category === "sell") {
     const { error } = noticeAddSellSchema.validate(req.body);
     if (error) {
       throw HttpError(400, error.message);
     }
-    const file = await cloudinaryUploader(path, "pets", filename);
-    const notice = await Notice.create({
-      ...req.body,
-      price: Number(price),
-      file,
-      owner,
-    });
-
-    res.status(201).json(notice);
+    noticeData.price = Number(price);
   }
 
-  const { error } = noticeAddSchema.validate(req.body);
-  if (error) {
-    throw HttpError(400, error.message);
+  if (category === "lost-found" || category === "in-good-hands") {
+    const { error } = noticeAddSchema.validate(req.body);
+    if (error) {
+      throw HttpError(400, error.message);
+    }
   }
+
   const file = await cloudinaryUploader(path, "pets", filename);
-  const notice = await Notice.create({ ...req.body, file, owner });
+  const dateBirth = normalizedDate(date);
+  const age = countPetAge(dateBirth);
 
+  noticeData = {
+    ...req.body,
+    date: dateBirth,
+    age,
+    file,
+    owner,
+  };
+
+  const notice = await Notice.create({ ...noticeData });
   res.status(201).json(notice);
 };
 
@@ -145,7 +192,7 @@ const removeNoticeFavorites = async (req, res) => {
   res.status(200).json(notice);
 };
 
-const getNoticesInFavorites = async (req, res) => {
+const getNoticesFromFavorites = async (req, res) => {
   const { _id } = req.user;
   const { page = 1, limit = 12 } = req.query;
   const skip = (page - 1) * limit;
@@ -193,7 +240,7 @@ module.exports = {
   addNotice: ctrlWrapper(addNotice),
   getNoticeById: ctrlWrapper(getNoticeById),
   updateNoticeFavorites: ctrlWrapper(updateNoticeFavorites),
-  getNoticesInFavorites: ctrlWrapper(getNoticesInFavorites),
+  getNoticesFromFavorites: ctrlWrapper(getNoticesFromFavorites),
   removeNoticeFavorites: ctrlWrapper(removeNoticeFavorites),
   getUserNotices: ctrlWrapper(getUserNotices),
   removeNotice: ctrlWrapper(removeNotice),

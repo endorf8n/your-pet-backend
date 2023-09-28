@@ -3,7 +3,6 @@ const {
   category,
   titleRegexp,
   nameRegexp,
-  dateRegexp,
   sex,
   cityRegexp,
 } = require("../constants/notice-constants");
@@ -32,8 +31,7 @@ const noticeSchema = new Schema(
       required: [true, "Name pet is required"],
     },
     date: {
-      type: String,
-      match: dateRegexp,
+      type: Date,
       required: [true, "Date of birth is required"],
     },
     type: {
@@ -51,6 +49,7 @@ const noticeSchema = new Schema(
       type: String,
       enum: sex,
       required: [true, "Sex pet is required"],
+      index: true
     },
     location: {
       type: String,
@@ -61,6 +60,11 @@ const noticeSchema = new Schema(
       type: Number,
       min: 0,
       default: 0,
+    },
+    age: {
+      type: Number,
+      index: true,
+      required: [true, "Age pet is required"],
     },
     comments: {
       type: String,

@@ -4,7 +4,7 @@ const ctrl = require('../../controllers/notices');
 const { authenticate, upload, isValidId } = require('../../middlewares');
 
 router.get('/', ctrl.getNotices);
-router.get("/favorites", authenticate, ctrl.getNoticesInFavorites);
+router.get("/favorites", authenticate, ctrl.getNoticesFromFavorites);
 router.get('/user-notices', authenticate, ctrl.getUserNotices);
 router.post('/', authenticate, upload.single('file'), ctrl.addNotice);
 router.get('/:noticeId', isValidId, ctrl.getNoticeById);
