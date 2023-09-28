@@ -23,7 +23,6 @@ mongoose
               await updateNews();
               console.log('Update successful!');
             } catch (retryError) {
-              console.log(retryError);
               console.log('Retry failed:');
             }
           });

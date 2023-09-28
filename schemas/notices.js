@@ -57,7 +57,6 @@ const noticeAddSchema = Joi.object({
       "any.required": "Date of birth pet is required",
     }),
   file: Joi.any()
-    .required()
     .messages({
       "any.required": "File is required",
     }),
@@ -157,7 +156,27 @@ const noticeAddSellSchema = Joi.object({
   comments: Joi.string().max(120)
 });
 
+const noticesGetSchema = Joi.object({
+  category: Joi.string()
+    .valid(...category)
+    .required()
+    .messages({
+      "string.valid.base": "Category must be sell, lost-found or in-good-hands",
+      "any.required": "Category pet is required",
+    }),
+  sex: Joi.string()
+    .valid(...sex)
+    .messages({
+      "string.valid.base": "Sex must be male or female",
+    }),
+  searchQuery: Joi.string(),
+  age: Joi.string(),
+  page: Joi.string(),
+  limit: Joi.string(),
+})
+
 module.exports = {
   noticeAddSchema,
   noticeAddSellSchema,
+  noticesGetSchema
 }

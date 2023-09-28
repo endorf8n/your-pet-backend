@@ -73,22 +73,6 @@ const updateNews = async () => {
   }
 };
 
-// const currentDate = new Date();
-
-// // Дата, з якою порівнюємо
-// const targetDate = new Date('10-10-2010');
-
-// // Обчислюємо різницю у мілісекундах
-// const differenceInMilliseconds = currentDate - targetDate;
-
-// // Кількість мілісекунд в році (приблизно)
-// const millisecondsPerYear = 1000 * 60 * 60 * 24 * 365.25;
-
-// // Обчислюємо різницю в роках
-// const differenceInYears = differenceInMilliseconds / millisecondsPerYear;
-
-// console.log(Різниця в роках: ${Math.ceil(differenceInYears)});
-
 module.exports = {
   updateNews,
 };

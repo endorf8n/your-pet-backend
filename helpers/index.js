@@ -5,6 +5,7 @@ const {
   cloudinaryRemover,
   getPublicId,
 } = require("./cloudinary");
+const {countPetAge, formattedDate, normalizedDate} = require("./formatDate");
 
 module.exports = {
   HttpError,
@@ -12,4 +13,7 @@ module.exports = {
   cloudinaryUploader,
   cloudinaryRemover,
   getPublicId,
+  countPetAge,
+  formattedDate,
+  normalizedDate
 };
