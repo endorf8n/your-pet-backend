@@ -1,8 +1,7 @@
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const axios = require("axios");
-const URL = require("url");
-// const queryString = require("query-string");
+const queryString = require("query-string");
 const User = require("../models/user");
 const {
   HttpError,
@@ -20,6 +19,7 @@ const {
   OAUTH_CLIENT_ID,
   OAUTH_CLIENT_SECRET_KEY,
   LOCAL_URL,
+  FRONTEND_URL,
 } = process.env;
 
 const register = async (req, res) => {
@@ -201,17 +201,38 @@ const googleAuth = async (req, res) => {
 };
 
 const googleRedirect = async (req, res) => {
-  const fullUrl = `${req.protocol}://${req.host}${req.originalUrl}`; // req.host 19-53 video
+  const fullUrl = `${req.protocol}://${req.host}${req.originalUrl}`;
   const urlObj = new URL(fullUrl);
   const urlParams = queryString.parse(urlObj.search);
-  console.log(urlParams);
-
   const code = urlParams.code;
-  console.log(code);
 
   const tokenData = await axios({
-    url: "",
+    url: `https://oauth2.googleapis.com/token`,
+    method: 'post',
+    data: {
+      client_id: OAUTH_CLIENT_ID,
+      client_secret: OAUTH_CLIENT_SECRET_KEY,
+      redirect_uri: `${LOCAL_URL}/api/users/google-redirect`,
+      grant_type: "authorization_code",
+      code,
+    }
   });
+
+  const userData = await axios({
+    url: "https://www.googleapis.com/oauth2/v2/userinfo",
+    method: "get",
+    headers: {
+      Authorization: `Bearer ${tokenData.data.access_token}`
+    }
+  })
+  
+  const { email } = userData.data
+  const user = await User.findOne({ email });
+  if (user) {
+    throw HttpError(409, "Email in use");
+  }
+
+  return res.redirect(`${FRONTEND_URL}`);
 };
 
 const refreshToken = async (req, res) => {
