@@ -214,7 +214,44 @@ const googleRedirect = async (req, res) => {
   });
 };
 
-const refreshToken = async (req, res) => {};
+const refreshToken = async (req, res) => {
+  const { refreshToken } = req.cookies;
+
+  if (!refreshToken) {
+    throw HttpError(401, "Not authorized: Refresh token is missing");
+  }
+
+  const { id } = jwt.verify(refreshToken, JWT_REFRESH_TOKEN);
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw HttpError(401, "Invalid refresh token");
+  }
+
+  const payload = {
+    id: user._id,
+  };
+
+  const newToken = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
+  const newRefreshToken = jwt.sign(payload, JWT_REFRESH_TOKEN, {
+    expiresIn: "30d",
+  });
+
+  res.cookie("refreshToken", newRefreshToken, {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  });
+
+  await User.findByIdAndUpdate(user._id, {
+    token: newToken,
+    refreshToken: newRefreshToken,
+  });
+
+  res.json({
+    token: newToken,
+    refreshToken: newRefreshToken,
+  });
+};
 
 module.exports = {
   register: ctrlWrapper(register),
