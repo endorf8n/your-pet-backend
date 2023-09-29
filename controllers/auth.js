@@ -10,6 +10,7 @@ const {
   getPublicId,
   normalizedDate,
   formattedDate,
+  generateRandomPassword,
 } = require("../helpers");
 const { ctrlWrapper } = require("../decorators");
 
@@ -208,31 +209,72 @@ const googleRedirect = async (req, res) => {
 
   const tokenData = await axios({
     url: `https://oauth2.googleapis.com/token`,
-    method: 'post',
+    method: "post",
     data: {
       client_id: OAUTH_CLIENT_ID,
       client_secret: OAUTH_CLIENT_SECRET_KEY,
       redirect_uri: `${LOCAL_URL}/api/users/google-redirect`,
       grant_type: "authorization_code",
       code,
-    }
+    },
   });
 
   const userData = await axios({
     url: "https://www.googleapis.com/oauth2/v2/userinfo",
     method: "get",
     headers: {
-      Authorization: `Bearer ${tokenData.data.access_token}`
-    }
-  })
-  
-  const { email } = userData.data
+      Authorization: `Bearer ${tokenData.data.access_token}`,
+    },
+  });
+
+  const { email, given_name } = userData.data;
+  console.log(userData.data);
   const user = await User.findOne({ email });
-  if (user) {
-    throw HttpError(409, "Email in use");
+
+  if (!user) {
+    const password = generateRandomPassword();
+    console.log(password);
+    const hashPassword = await bcrypt.hash(password, 10);
+    const newUser = await User.create({
+      name: given_name,
+      email,
+      password: hashPassword,
+    });
+
+    const payload = {
+      id: newUser._id,
+    };
+
+    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
+    const refreshToken = jwt.sign(payload, JWT_REFRESH_TOKEN, {
+      expiresIn: "30d",
+    });
+
+    await User.findByIdAndUpdate(newUser._id, { token, refreshToken });
+    res.cookie("refreshToken", refreshToken, {
+      maxAge: 30 * 24 * 60 * 60 * 1000,
+      httpOnly: true,
+    });
+
+    return res.redirect(`${FRONTEND_URL}?token=${token}&refreshToken=${refreshToken}`);
   }
 
-  return res.redirect(`${FRONTEND_URL}`);
+  const payload = {
+    id: user._id,
+  };
+
+  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
+  const refreshToken = jwt.sign(payload, JWT_REFRESH_TOKEN, {
+    expiresIn: "30d",
+  });
+
+  await User.findByIdAndUpdate(user._id, { token, refreshToken });
+  res.cookie("refreshToken", refreshToken, {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  });
+
+  return res.redirect(`${FRONTEND_URL}?token=${token}&refreshToken=${refreshToken}`);
 };
 
 const refreshToken = async (req, res) => {

@@ -3,57 +3,28 @@ const { ctrlWrapper } = require("../decorators");
 const {
   noticeAddSchema,
   noticeAddSellSchema,
-  noticesGetSchema,
+  getNoticesSchema,
+  userGetNoticesSchema,
 } = require("../schemas/notices");
 const {
   HttpError,
   cloudinaryUploader,
   cloudinaryRemover,
   getPublicId,
+  buildSearchConfigurations,
+  buildPaginationOptions,
 } = require("../helpers");
 const noticeConst = require("../constants/notice-constants");
 const { countPetAge, formattedDate, normalizedDate } = require("../helpers");
 
 const getNotices = async (req, res) => {
-  const {
-    page = 1,
-    limit = 12,
-    category,
-    searchQuery = "",
-    age,
-    sex,
-  } = req.query;
-  const skip = (page - 1) * limit;
-  const searchConfigurations = {};
-  const score = {};
-
-  const { error } = noticesGetSchema.validate(req.query);
+  const { error } = getNoticesSchema.validate(req.query);
   if (error) {
     throw HttpError(400, error.message);
   }
 
-  if (sex) {
-    searchConfigurations.sex = sex;
-  }
-
-  if (searchQuery) {
-    searchConfigurations["$text"] = { $search: searchQuery };
-    score.score = { $meta: "textScore" };
-  }
-
-  if (age) {
-    const ageValue = Number(age);
-
-    if (!Number.isNaN(ageValue) && ageValue >= 0) {
-      const ageFilter =
-        ageValue <= 1 ? { $lte: 1 } : ageValue <= 2 ? { $lte: 2 } : { $gt: 2 };
-      searchConfigurations.age = ageFilter;
-    } else {
-      throw HttpError(400, "Bad request, age must be a non-negative number");
-    }
-  }
-
-  searchConfigurations.category = category;
+  const { searchConfigurations, score } = buildSearchConfigurations(req.query);
+  const { skip, page, limit } = buildPaginationOptions(req.query);
 
   const total = await Notice.countDocuments(searchConfigurations);
   const totalPages = Math.ceil(total / limit);
@@ -83,7 +54,6 @@ const getNoticeById = async (req, res) => {
   if (!notice) {
     throw HttpError(404, "Notice not found");
   }
-
   const formatDate = formattedDate(notice.date);
 
   res.status(200).json({
@@ -94,18 +64,30 @@ const getNoticeById = async (req, res) => {
 
 const getUserNotices = async (req, res) => {
   const { _id: owner } = req.user;
-  const { page = 1, limit = 12 } = req.query;
-  const skip = (page - 1) * limit;
-
-  const total = await Notice.countDocuments({ owner });
-  const totalPages = Math.ceil(total / limit);
-  if (total === 0 || page > totalPages) {
-    throw HttpError(404, "Your notice not found for your request");
+  const { error } = userGetNoticesSchema.validate(req.query);
+  if (error) {
+    throw HttpError(400, error.message);
   }
 
-  const notices = await Notice.find({ owner }, "", { skip, limit }).sort({
-    createdAt: -1,
-  });
+  const { searchConfigurations, score } = buildSearchConfigurations(req.query);
+  const { skip, page, limit } = buildPaginationOptions(req.query);
+  searchConfigurations.owner = owner;
+
+  const total = await Notice.countDocuments(searchConfigurations);
+  const totalPages = Math.ceil(total / limit);
+  if (total === 0 || page > totalPages) {
+    throw HttpError(404, "Notiсes not found for your request");
+  }
+
+  const notices = await Notice.find(searchConfigurations, score, {
+    skip,
+    limit,
+  })
+    .populate({
+      path: "owner",
+      select: { email: 1, phone: 1 },
+    })
+    .sort({ ...score, createdAt: -1 });
 
   res.status(200).json({ page, limit, total, totalPages, notices });
 };
@@ -145,6 +127,7 @@ const addNotice = async (req, res) => {
   const file = await cloudinaryUploader(path, "pets", filename);
   const dateBirth = normalizedDate(date);
   const age = countPetAge(dateBirth);
+  console.log(age);
 
   noticeData = {
     ...req.body,
@@ -194,19 +177,31 @@ const removeNoticeFavorites = async (req, res) => {
 
 const getNoticesFromFavorites = async (req, res) => {
   const { _id } = req.user;
-  const { page = 1, limit = 12 } = req.query;
-  const skip = (page - 1) * limit;
 
-  const total = await Notice.countDocuments({ favorites: { $in: [_id] } });
-  const totalPages = Math.ceil(total / limit);
-  if (total === 0 || page > totalPages) {
-    throw HttpError(404, "Your notice not found for your request");
+  const { error } = userGetNoticesSchema.validate(req.query);
+  if (error) {
+    throw HttpError(400, error.message);
   }
 
-  const notices = await Notice.find({ favorites: { $in: [_id] } }, "", {
+  const { searchConfigurations, score } = buildSearchConfigurations(req.query);
+  const { skip, page, limit } = buildPaginationOptions(req.query);
+  searchConfigurations.favorites = { $in: [_id] };
+
+  const total = await Notice.countDocuments(searchConfigurations);
+  const totalPages = Math.ceil(total / limit);
+  if (total === 0 || page > totalPages) {
+    throw HttpError(404, "Notiсes not found for your request");
+  }
+
+  const notices = await Notice.find(searchConfigurations, score, {
     skip,
     limit,
-  });
+  })
+    .populate({
+      path: "owner",
+      select: { email: 1, phone: 1 },
+    })
+    .sort({ ...score, createdAt: -1 });
 
   res.status(200).json({ page, limit, total, totalPages, notices });
 };

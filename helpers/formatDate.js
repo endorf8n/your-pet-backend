@@ -2,10 +2,9 @@ const countPetAge = (targetDate) => {
   const currentDate = new Date();
   const differenceInMilliseconds = currentDate - targetDate;
   const millisecondsPerYear = 1000 * 60 * 60 * 24 * 365.25;
-  const differenceInYears = Math.ceil(
-    differenceInMilliseconds / millisecondsPerYear
-  );
-  return differenceInYears;
+  const differenceInYears = differenceInMilliseconds / millisecondsPerYear
+  
+  return differenceInYears.toFixed(2);
 };
 
 const formattedDate = (dateFromBackend) => {

@@ -5,7 +5,15 @@ const {
   cloudinaryRemover,
   getPublicId,
 } = require("./cloudinary");
-const {countPetAge, formattedDate, normalizedDate} = require("./formatDate");
+const {
+  countPetAge,
+  formattedDate,
+  normalizedDate
+} = require("./formatDate");
+
+const buildPaginationOptions = require("./buildPaginationOptions");
+const buildSearchConfigurations = require("./buildSearchConfigurations");
+const generateRandomPassword = require("./generateRandomPassword");
 
 module.exports = {
   HttpError,
@@ -15,5 +23,8 @@ module.exports = {
   getPublicId,
   countPetAge,
   formattedDate,
-  normalizedDate
+  normalizedDate,
+  buildPaginationOptions,
+  buildSearchConfigurations,
+  generateRandomPassword
 };
