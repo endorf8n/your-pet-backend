@@ -2,8 +2,6 @@ const { Schema, model } = require("mongoose");
 
 const { handleValidateError } = require("./hooks");
 
-const { birthdayRegexp } = require("../constants/user-constants");
-
 const petSchema = new Schema(
   {
     name: {
@@ -12,8 +10,7 @@ const petSchema = new Schema(
     },
 
     dateOfBirth: {
-      type: String,
-      match: birthdayRegexp,
+      type: Date,
       required: [true, "Date of birth is required"],
     },
 

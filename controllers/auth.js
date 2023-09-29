@@ -4,12 +4,13 @@ const axios = require("axios");
 const URL = require("url");
 // const queryString = require("query-string");
 const User = require("../models/user");
-const Pet = require("../models/pet");
 const {
   HttpError,
   cloudinaryUploader,
   cloudinaryRemover,
   getPublicId,
+  normalizedDate,
+  formattedDate,
 } = require("../helpers");
 const { ctrlWrapper } = require("../decorators");
 
@@ -97,10 +98,15 @@ const editProfile = async (req, res) => {
     avatarURL = await cloudinaryUploader(path, "avatars", filename, 182, 182);
     userData.avatarURL = avatarURL;
   }
+  const formatBirthday = normalizedDate(userData.birthday);
 
-  const editedUser = await User.findByIdAndUpdate(_id, userData, {
-    new: true,
-  });
+  const editedUser = await User.findByIdAndUpdate(
+    _id,
+    { ...userData, birthday: formatBirthday },
+    {
+      new: true,
+    }
+  );
 
   if (!editedUser) {
     throw HttpError(404, `User with ${_id} not found`);
@@ -111,6 +117,7 @@ const editProfile = async (req, res) => {
     await cloudinaryRemover(public_id, "avatars");
   }
   const { name, email, phone, city, birthday } = editedUser;
+  const formattedBirthday = formattedDate(birthday);
 
   res.json({
     name,
@@ -118,6 +125,7 @@ const editProfile = async (req, res) => {
     phone,
     city,
     birthday,
+    formattedBirthday,
     avatarURL: avatarURL || editedUser.avatarURL,
   });
 };
@@ -142,7 +150,7 @@ const getCurrent = async (req, res) => {
         email: 1,
         password: 1,
         avatarURL: 1,
-        birthday: 1,
+        birthday: { $dateToString: { format: "%d.%m.%Y", date: "$birthday" } },
         phone: 1,
         city: 1,
         pets: {
@@ -152,7 +160,12 @@ const getCurrent = async (req, res) => {
             in: {
               _id: "$$pet._id",
               name: "$$pet.name",
-              dateOfBirth: "$$pet.dateOfBirth",
+              dateOfBirth: {
+                $dateToString: {
+                  format: "%d.%m.%Y",
+                  date: "$$pet.dateOfBirth",
+                },
+              },
               type: "$$pet.type",
               comments: "$$pet.comments",
               petURL: "$$pet.petURL",
@@ -201,7 +214,44 @@ const googleRedirect = async (req, res) => {
   });
 };
 
-const refreshToken = async (req, res) => {};
+const refreshToken = async (req, res) => {
+  const { refreshToken } = req.cookies;
+
+  if (!refreshToken) {
+    throw HttpError(401, "Not authorized: Refresh token is missing");
+  }
+
+  const { id } = jwt.verify(refreshToken, JWT_REFRESH_TOKEN);
+  const user = await User.findById(id);
+
+  if (!user) {
+    throw HttpError(401, "Invalid refresh token");
+  }
+
+  const payload = {
+    id: user._id,
+  };
+
+  const newToken = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
+  const newRefreshToken = jwt.sign(payload, JWT_REFRESH_TOKEN, {
+    expiresIn: "30d",
+  });
+
+  res.cookie("refreshToken", newRefreshToken, {
+    maxAge: 30 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+  });
+
+  await User.findByIdAndUpdate(user._id, {
+    token: newToken,
+    refreshToken: newRefreshToken,
+  });
+
+  res.json({
+    token: newToken,
+    refreshToken: newRefreshToken,
+  });
+};
 
 module.exports = {
   register: ctrlWrapper(register),

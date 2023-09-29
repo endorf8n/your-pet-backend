@@ -5,7 +5,10 @@ const {
   cloudinaryUploader,
   cloudinaryRemover,
   getPublicId,
+  formattedDate,
+  normalizedDate,
 } = require("../helpers");
+
 const { ctrlWrapper } = require("../decorators");
 
 const addPet = async (req, res) => {
@@ -23,8 +26,12 @@ const addPet = async (req, res) => {
     const { path, filename } = req.file;
     petURL = await cloudinaryUploader(path, "owner-pets", filename, 161, 161);
   }
+
+  const normDateOFBirth = normalizedDate(body.dateOfBirth);
+
   const data = {
     ...body,
+    dateOfBirth: normDateOFBirth,
     owner,
     petURL,
   };
@@ -37,10 +44,13 @@ const addPet = async (req, res) => {
 
   const { name, dateOfBirth, type, comments, _id } = result;
 
+  const formattedDateOfBirth = formattedDate(dateOfBirth);
+
   res.status(201).json({
     _id,
     name,
     dateOfBirth,
+    formattedDateOfBirth,
     type,
     comments,
     petURL,
