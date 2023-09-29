@@ -1,10 +1,16 @@
 const New = require("../models/new");
 const { ctrlWrapper } = require("../decorators");
-const { HttpError } = require("../helpers");
+const { HttpError, buildPaginationOptions } = require("../helpers");
+const { getNewsSchema } = require("../schemas/news");
 
 const getNews = async (req, res) => {
-  const { page = 1, limit = 6, searchQuery = "" } = req.query;
-  const skip = (page - 1) * limit;
+  const { error } = getNewsSchema.validate(req.query);
+  if (error) {
+    throw HttpError(400, error.message);
+  }
+
+  const { skip, page, limit } = buildPaginationOptions(req.query);
+  const { searchQuery = "" } = req.query;
   const searchConfigurations = {};
   const score = {};
 

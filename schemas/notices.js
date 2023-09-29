@@ -156,7 +156,7 @@ const noticeAddSellSchema = Joi.object({
   comments: Joi.string().max(120)
 });
 
-const noticesGetSchema = Joi.object({
+const getNoticesSchema = Joi.object({
   category: Joi.string()
     .valid(...category)
     .required()
@@ -170,7 +170,19 @@ const noticesGetSchema = Joi.object({
       "string.valid.base": "Sex must be male or female",
     }),
   searchQuery: Joi.string(),
-  age: Joi.string(),
+  age: Joi.alternatives().try(Joi.string(), Joi.array()),
+  page: Joi.string(),
+  limit: Joi.string(),
+})
+
+const userGetNoticesSchema = Joi.object({
+  sex: Joi.string()
+    .valid(...sex)
+    .messages({
+      "string.valid.base": "Sex must be male or female",
+    }),
+  searchQuery: Joi.string(),
+  age: Joi.alternatives().try(Joi.string(), Joi.array()),
   page: Joi.string(),
   limit: Joi.string(),
 })
@@ -178,5 +190,6 @@ const noticesGetSchema = Joi.object({
 module.exports = {
   noticeAddSchema,
   noticeAddSellSchema,
-  noticesGetSchema
+  getNoticesSchema,
+  userGetNoticesSchema,
 }
