@@ -21,6 +21,7 @@ const {
   OAUTH_CLIENT_SECRET_KEY,
   LOCAL_URL,
   FRONTEND_URL,
+  BASE_URL,
 } = process.env;
 
 const register = async (req, res) => {
@@ -186,7 +187,7 @@ const getCurrent = async (req, res) => {
 const googleAuth = async (req, res) => {
   const stringifiedParams = queryString.stringify({
     client_id: OAUTH_CLIENT_ID,
-    redirect_uri: `${LOCAL_URL}/api/users/google-redirect`,
+    redirect_uri: `${BASE_URL}/api/users/google-redirect`,
     scope: [
       "https://www.googleapis.com/auth/userinfo.email",
       "https://www.googleapis.com/auth/userinfo.profile",
@@ -213,7 +214,7 @@ const googleRedirect = async (req, res) => {
     data: {
       client_id: OAUTH_CLIENT_ID,
       client_secret: OAUTH_CLIENT_SECRET_KEY,
-      redirect_uri: `${LOCAL_URL}/api/users/google-redirect`,
+      redirect_uri: `${BASE_URL}/api/users/google-redirect`,
       grant_type: "authorization_code",
       code,
     },
