@@ -13,7 +13,7 @@ const {
 
 const buildPaginationOptions = require("./buildPaginationOptions");
 const buildSearchConfigurations = require("./buildSearchConfigurations");
-const generateRandomPassword = require("./generateRandomPassword");
+const generateRandomPassword = require("./generateRandomPass");
 
 module.exports = {
   HttpError,
