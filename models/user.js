@@ -42,7 +42,6 @@ const userSchema = new Schema(
 
     birthday: {
       type: Date,
-      default: null,
     },
 
     phone: {
