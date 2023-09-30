@@ -33,7 +33,12 @@ const register = async (req, res) => {
 
   const hashPassword = await bcrypt.hash(password, 10);
 
-  const newUser = await User.create({ ...req.body, password: hashPassword });
+  const birthday = new Date();
+  const newUser = await User.create({
+    ...req.body,
+    password: hashPassword,
+    birthday,
+  });
 
   res.status(201).json({
     name: newUser.name,
@@ -126,8 +131,7 @@ const editProfile = async (req, res) => {
     email,
     phone,
     city,
-    birthday,
-    formattedBirthday,
+    birthday: formattedBirthday,
     avatarURL: avatarURL || editedUser.avatarURL,
   });
 };
@@ -257,7 +261,9 @@ const googleRedirect = async (req, res) => {
       httpOnly: true,
     });
 
-    return res.redirect(`${FRONTEND_URL}?token=${token}&refreshToken=${refreshToken}`);
+    return res.redirect(
+      `${FRONTEND_URL}?token=${token}&refreshToken=${refreshToken}`
+    );
   }
 
   const payload = {
@@ -275,7 +281,9 @@ const googleRedirect = async (req, res) => {
     httpOnly: true,
   });
 
-  return res.redirect(`${FRONTEND_URL}?token=${token}&refreshToken=${refreshToken}`);
+  return res.redirect(
+    `${FRONTEND_URL}?token=${token}&refreshToken=${refreshToken}`
+  );
 };
 
 const refreshToken = async (req, res) => {
