@@ -257,7 +257,7 @@ const googleRedirect = async (req, res) => {
       httpOnly: true,
     });
 
-    return res.redirect(`http://localhost:3000/your-pet-front?token=${token}&refreshToken=${refreshToken}`);
+    return res.redirect(`${FRONTEND_URL}?token=${token}&refreshToken=${refreshToken}`);
   }
 
   const payload = {
@@ -275,7 +275,7 @@ const googleRedirect = async (req, res) => {
     httpOnly: true,
   });
 
-  return res.redirect(`http://localhost:3000/your-pet-front?token=${token}&refreshToken=${refreshToken}`);
+  return res.redirect(`${FRONTEND_URL}?token=${token}&refreshToken=${refreshToken}`);
 };
 
 const refreshToken = async (req, res) => {
