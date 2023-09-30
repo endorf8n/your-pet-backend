@@ -19,7 +19,6 @@ const {
   JWT_REFRESH_TOKEN,
   OAUTH_CLIENT_ID,
   OAUTH_CLIENT_SECRET_KEY,
-  LOCAL_URL,
   FRONTEND_URL,
   BASE_URL,
 } = process.env;
@@ -233,12 +232,10 @@ const googleRedirect = async (req, res) => {
   });
 
   const { email, given_name } = userData.data;
-  console.log(userData.data);
   const user = await User.findOne({ email });
 
   if (!user) {
     const password = generateRandomPassword();
-    console.log(password);
     const hashPassword = await bcrypt.hash(password, 10);
     const newUser = await User.create({
       name: given_name,

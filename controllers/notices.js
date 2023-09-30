@@ -93,15 +93,19 @@ const getUserNotices = async (req, res) => {
 };
 
 const addNotice = async (req, res) => {
-  const { _id: owner } = req.user;
-  const { category, price, date } = req.body;
-  let noticeData = {};
+  if (!Object.keys(req.body).length) {
+    throw HttpError(400, "missing fields");
+  }
 
   if (!req.file) {
     throw HttpError(400, "Bad request, image file is required");
   }
-  const { path, filename } = req.file;
 
+  const { _id: owner } = req.user;
+  const { category, price, date } = req.body;
+  const { path, filename } = req.file;
+  let noticeData = {};
+  
   if (!noticeConst.category.includes(category)) {
     throw HttpError(
       400,
@@ -127,7 +131,6 @@ const addNotice = async (req, res) => {
   const file = await cloudinaryUploader(path, "pets", filename);
   const dateBirth = normalizedDate(date);
   const age = countPetAge(dateBirth);
-  console.log(age);
 
   noticeData = {
     ...req.body,
