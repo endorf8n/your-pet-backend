@@ -49,8 +49,7 @@ const addPet = async (req, res) => {
   res.status(201).json({
     _id,
     name,
-    dateOfBirth,
-    formattedDateOfBirth,
+    dateOfBirth: formattedDateOfBirth,
     type,
     comments,
     petURL,
