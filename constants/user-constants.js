@@ -6,7 +6,7 @@ const phoneRegexp = /^\+380\d{9}$/;
 const cityRegexp = /^[A-Z][A-Za-z\-]+$/;
 
 const defaultAvatar =
-  "https://res.cloudinary.com/dkmmhjqew/image/upload/v1695371865/default-avatar/default-avatar_ipj3sf.png";
+  "https://res.cloudinary.com/dkmmhjqew/image/upload/v1696086608/default-avatar/Photo_default_ndssoh.png";
 
 module.exports = {
   emailRegexp,
