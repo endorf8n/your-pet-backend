@@ -72,8 +72,8 @@ const login = async (req, res) => {
     httpOnly: true,
   });
   res.json({
-    refreshToken,
     token,
+    refreshToken,
     name: user.name,
   });
 };
@@ -153,7 +153,6 @@ const getCurrent = async (req, res) => {
         _id: 1,
         name: 1,
         email: 1,
-        password: 1,
         avatarURL: 1,
         birthday: { $dateToString: { format: "%d.%m.%Y", date: "$birthday" } },
         phone: 1,
