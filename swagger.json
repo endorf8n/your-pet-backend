@@ -492,6 +492,145 @@
           }
         }
       }
+    },
+    "/api/pets/{petId}": {
+      "delete": {
+        "tags": ["Pets"],
+        "summary": "Delete pet by pet's ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "petId",
+            "required": true,
+            "description": "Pet`s ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteOwnPetResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response401"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteOwnPetResponse404"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/friends": {
+      "get": {
+        "tags": ["Friends"],
+        "summary": "Get all friends",
+        "responses": {
+          "200": {
+            "code": 200,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/FriendsResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response404"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/news": {
+      "get": {
+        "tags": ["News"],
+        "summary": "Get fresh news",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "searchQuery",
+            "description": "Search query for text search",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Page number for paginataion",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Number of items per page",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "responses": {
+          "200": {
+            "code": 200,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewsResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NewsResponse400"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response404"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
@@ -1285,6 +1424,257 @@
           "type": "British shorthair",
           "comments": "Good friend",
           "petURL": "http://res.cloudinary.com/dkmmhjqew/image/upload/v1696171418/owner-pets/1696171414601-671921562_test-dog.jpg.jpg"
+        }
+      },
+      "DeleteOwnPetResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Succesful deletion",
+            "example": "Pet information deleted"
+          }
+        },
+        "example": {
+          "message": "Pet information deleted"
+        }
+      },
+      "DeleteOwnPetResponse404": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Bad request (invalid pet's ID)",
+            "example": "6519859ab0f82f9d86f7151 is not valid ID"
+          }
+        },
+        "example": {
+          "message": "6519859ab0f82f9d86f7151 is not valid ID"
+        }
+      },
+      "FriendsResponse": {
+        "type": "object",
+        "properties": {
+          "friends": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "Friends's ID",
+                  "example": "651166a17d229d0c3648e327"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Company name",
+                  "example": "Happy Paw"
+                },
+                "url": {
+                  "type": "string",
+                  "description": "Company's site URL",
+                  "example": "https://happypaw.ua/ua"
+                },
+                "addressUrl": {
+                  "type": "string",
+                  "description": "Company's address URL",
+                  "example": "https://goo.gl/maps/3RyzTYBvMr9WQWCC6"
+                },
+                "imageUrl": {
+                  "type": "string",
+                  "description": "Company's logo URL",
+                  "example": "https://storage.googleapis.com/kidslikev2_bucket/pets-support/images/sponsors/frame_288.png"
+                },
+                "address": {
+                  "type": "string",
+                  "description": "Company's address",
+                  "example": "Київ, вулиця Шота Руставелі, 44 (3-й поверх, офіс 7)"
+                },
+                "workDays": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "isOpen": {
+                        "type": "boolean",
+                        "description": "Information about working company status",
+                        "example": true
+                      },
+                      "from": {
+                        "type": "string",
+                        "description": "Start time of the working day ",
+                        "example": "09.00"
+                      },
+                      "to": {
+                        "type": "string",
+                        "description": "Finish time of the working day ",
+                        "example": "17.00"
+                      }
+                    }
+                  }
+                },
+                "phone": {
+                  "type": "string",
+                  "description": "Phone number of company",
+                  "example": "+380442900329"
+                },
+                "email": {
+                  "type": "string",
+                  "description": "Company's email",
+                  "example": "hello@happypaw.ua"
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "friends": [
+            {
+              "_id": "651166a17d229d0c3648e327",
+              "title": "Happy Paw",
+              "url": "https://happypaw.ua/ua",
+              "addressUrl": "https://goo.gl/maps/3RyzTYBvMr9WQWCC6",
+              "imageUrl": "https://storage.googleapis.com/kidslikev2_bucket/pets-support/images/sponsors/frame_288.png",
+              "address": "Київ, вулиця Шота Руставелі, 44 (3-й поверх, офіс 7)",
+              "workDays": [
+                {
+                  "isOpen": true,
+                  "from": "09:00",
+                  "to": "17:00"
+                },
+                {
+                  "isOpen": true,
+                  "from": "09:00",
+                  "to": "17:00"
+                },
+                {
+                  "isOpen": true,
+                  "from": "09:00",
+                  "to": "17:00"
+                },
+                {
+                  "isOpen": true,
+                  "from": "09:00",
+                  "to": "17:00"
+                },
+                {
+                  "isOpen": true,
+                  "from": "09:00",
+                  "to": "17:00"
+                },
+                {
+                  "isOpen": true,
+                  "from": "09:00",
+                  "to": "17:00"
+                },
+                {
+                  "isOpen": true,
+                  "from": "09:00",
+                  "to": "17:00"
+                }
+              ],
+              "phone": "+380442900329",
+              "email": "hello@happypaw.ua"
+            }
+          ]
+        }
+      },
+      "NewsResponse": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Page number",
+            "example": "1"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "News per page",
+            "example": "12"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of news",
+            "example": "30"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "Total number of pages",
+            "example": "3"
+          },
+          "news": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "New`s ID",
+                  "example": "6517e8f6688297f753655385"
+                },
+                "uuid": {
+                  "type": "string",
+                  "description": "New's uuid",
+                  "example": "4a9f5024-f6d9-4049-87b5-4cd399ad1868"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Title of new",
+                  "example": "Fishing and its health benefits"
+                },
+                "description": {
+                  "type": "string",
+                  "description": "New's description",
+                  "example": "A recent study showed that men who enjoy fishing as a hobby may have a lower risk of depression, anxiety, suicidal thoughts and other mental health conditions."
+                },
+                "url": {
+                  "type": "string",
+                  "description": "New's URL",
+                  "example": "https://www.foxnews.com/health/fishing-health-benefits-more-men-go-fishing-better-their-mental-health-study-finds"
+                },
+                "image_url": {
+                  "type": "string",
+                  "description": "Main article image URL",
+                  "example": "https://static.foxnews.com/foxnews.com/content/uploads/2023/09/man-fishing.jpg"
+                },
+                "published_at": {
+                  "type": "date",
+                  "description": "News publication time",
+                  "example": "2023-09-30T09:10:01.000000Z"
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "page": 1,
+          "limit": 12,
+          "total": 30,
+          "totalPages": 3,
+          "news": [
+            {
+              "_id": "6517e8f6688297f753655385",
+              "uuid": "4a9f5024-f6d9-4049-87b5-4cd399ad1868",
+              "title": "Fishing and its health benefits",
+              "description": "A recent study showed that men who enjoy fishing as a hobby may have a lower risk of depression, anxiety, suicidal thoughts and other mental health conditions.",
+              "url": "https://www.foxnews.com/health/fishing-health-benefits-more-men-go-fishing-better-their-mental-health-study-finds",
+              "image_url": "https://static.foxnews.com/foxnews.com/content/uploads/2023/09/man-fishing.jpg",
+              "published_at": "2023-09-30T09:10:01.000000Z"
+            }
+          ]
+        }
+      },
+      "NewsResponse400": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Bad request",
+            "example": "'searchQuery' is not allowed to be empty"
+          }
+        },
+        "example": {
+          "message": "'searchQuery' is not allowed to be empty"
         }
       }
     },
