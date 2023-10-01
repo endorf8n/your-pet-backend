@@ -1,3 +1,5 @@
+const HttpError = require('./HttpError');
+
 const buildSearchConfigurations = (query) => {
   const {
     category,

@@ -11,11 +11,11 @@ const {
   normalizedDate,
   formattedDate,
   generateRandomPassword,
+  generateToken
 } = require("../helpers");
 const { ctrlWrapper } = require("../decorators");
 
 const {
-  JWT_SECRET,
   JWT_REFRESH_TOKEN,
   OAUTH_CLIENT_ID,
   OAUTH_CLIENT_SECRET_KEY,
@@ -57,14 +57,7 @@ const login = async (req, res) => {
     throw HttpError(401, "Email or password is wrong");
   }
 
-  const payload = {
-    id: user._id,
-  };
-
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
-  const refreshToken = jwt.sign(payload, JWT_REFRESH_TOKEN, {
-    expiresIn: "30d",
-  });
+  const {token, refreshToken} = generateToken(user._id);
 
   await User.findByIdAndUpdate(user._id, { token, refreshToken });
   res.cookie("refreshToken", refreshToken, {
@@ -243,15 +236,7 @@ const googleRedirect = async (req, res) => {
       password: hashPassword,
     });
 
-    const payload = {
-      id: newUser._id,
-    };
-
-    const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
-    const refreshToken = jwt.sign(payload, JWT_REFRESH_TOKEN, {
-      expiresIn: "30d",
-    });
-
+    const {token, refreshToken} = generateToken(newUser._id);
     await User.findByIdAndUpdate(newUser._id, { token, refreshToken });
     res.cookie("refreshToken", refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -263,15 +248,7 @@ const googleRedirect = async (req, res) => {
     );
   }
 
-  const payload = {
-    id: user._id,
-  };
-
-  const token = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
-  const refreshToken = jwt.sign(payload, JWT_REFRESH_TOKEN, {
-    expiresIn: "30d",
-  });
-
+  const {token, refreshToken} = generateToken(user._id);
   await User.findByIdAndUpdate(user._id, { token, refreshToken });
   res.cookie("refreshToken", refreshToken, {
     maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -297,14 +274,7 @@ const refreshToken = async (req, res) => {
     throw HttpError(401, "Invalid refresh token");
   }
 
-  const payload = {
-    id: user._id,
-  };
-
-  const newToken = jwt.sign(payload, JWT_SECRET, { expiresIn: "23h" });
-  const newRefreshToken = jwt.sign(payload, JWT_REFRESH_TOKEN, {
-    expiresIn: "30d",
-  });
+  const {token: newToken, refreshToken: newRefreshToken} = generateToken(user._id);
 
   res.cookie("refreshToken", newRefreshToken, {
     maxAge: 30 * 24 * 60 * 60 * 1000,

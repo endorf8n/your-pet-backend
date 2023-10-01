@@ -14,6 +14,7 @@ const {
 const buildPaginationOptions = require("./buildPaginationOptions");
 const buildSearchConfigurations = require("./buildSearchConfigurations");
 const generateRandomPassword = require("./generateRandomPass");
+const generateToken = require("./generateToken");
 
 module.exports = {
   HttpError,
@@ -26,5 +27,6 @@ module.exports = {
   normalizedDate,
   buildPaginationOptions,
   buildSearchConfigurations,
-  generateRandomPassword
+  generateRandomPassword,
+  generateToken
 };
