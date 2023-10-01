@@ -433,6 +433,103 @@
         }
       }
     },
+    "/api/notices/{noticeId}": {
+      "get": {
+        "tags": ["Notices"],
+        "summary": "Getting information about the selected notice",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "noticeId",
+            "required": true,
+            "description": "Notice`s ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetNoticeByIdResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response404"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": ["Notices"],
+        "summary": "Delete notice by notice's ID",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "noticeId",
+            "required": true,
+            "description": "Notice`s ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteNoticeResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response401"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DeleteNoticeResponse403"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response404"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/pets": {
       "post": {
         "tags": ["Pets"],
@@ -1675,6 +1772,162 @@
         },
         "example": {
           "message": "'searchQuery' is not allowed to be empty"
+        }
+      },
+      "DeleteNoticeResponse": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Succesful deletion",
+            "example": "Success your notice deleted"
+          }
+        },
+        "example": {
+          "message": "Success your notice deleted"
+        }
+      },
+      "DeleteNoticeResponse403": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Forbidden",
+            "example": "You are not allowed to delete this notice"
+          }
+        },
+        "example": {
+          "message": "You are not allowed to delete this notice"
+        }
+      },
+      "GetNoticeByIdResponse": {
+        "type": "object",
+        "properties": {
+          "notice": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "description": "Notices`s ID",
+                "example": "651558dce6f1a35514d7b3f5"
+              },
+              "category": {
+                "type": "string",
+                "description": "Category of notice",
+                "example": "sell"
+              },
+              "title": {
+                "type": "string",
+                "description": "Title of notice",
+                "example": "Dogs"
+              },
+              "name": {
+                "type": "string",
+                "description": "Name of the pet",
+                "example": "Baron"
+              },
+              "date": {
+                "type": "date",
+                "description": "Notice date creation",
+                "example": "2020-07-08T21:00:00.000"
+              },
+              "type": {
+                "type": "string",
+                "description": "Pet's breed",
+                "example": "Doberman"
+              },
+              "file": {
+                "type": "string",
+                "description": "Notice's pet URL",
+                "example": "http://res.cloudinary.com/dkmmhjqew/image/upload/v1695897819/pets/1695897818321-635571560_1564314059_1.jpg.jpg"
+              },
+              "sex": {
+                "type": "string",
+                "description": "Pet's sex",
+                "example": "male"
+              },
+              "location": {
+                "type": "string",
+                "description": "Location of pet's owner",
+                "example": "Kyiv"
+              },
+              "price": {
+                "type": "integer",
+                "description": "Price of the pet",
+                "example": "1000"
+              },
+              "comments": {
+                "type": "string",
+                "description": "Notice's comments",
+                "example": "Real friend"
+              },
+              "favorites": {
+                "type": "array",
+                "description": "Favorite notices",
+                "example": ""
+              },
+              "owner": {
+                "type": "object",
+                "properties": {
+                  "_id": {
+                    "type": "string",
+                    "description": "Owner`s ID",
+                    "example": "6516b746b82f44b07635ae5e"
+                  },
+                  "email": {
+                    "type": "string",
+                    "description": "Owner's email",
+                    "format": "email",
+                    "example": "example@mail.com"
+                  },
+                  "phone": {
+                    "type": "string",
+                    "description": "Owner's phone number",
+                    "example": "+380981234567"
+                  }
+                }
+              },
+              "createdAt": {
+                "type": "date",
+                "description": "Notice creation time",
+                "example": "2023-09-28T10:43:40.059Z"
+              },
+              "updatedAt": {
+                "type": "date",
+                "description": "Notice updating time",
+                "example": "2023-09-29T14:26:35.155Z"
+              }
+            }
+          },
+          "formatDate": {
+            "type": "string",
+            "description": "Notice date creation",
+            "example": "09.07.2020"
+          }
+        },
+        "example": {
+          "notice": {
+            "_id": "6516db126d4047b47404f0dc",
+            "category": "sell",
+            "title": "dogs",
+            "name": "Baron",
+            "date": "2021-08-30T21:00:00.000Z",
+            "type": "Sphinx",
+            "file": "http://res.cloudinary.com/dkmmhjqew/image/upload/v1695996689/pets/1695996688982-903310852_1564314059_1.jpg.jpg",
+            "sex": "male",
+            "location": "Kyiv",
+            "price": "1033",
+            "comments": "Real friend",
+            "favorites": "[]",
+            "owner": {
+              "_id": "6516b746b82f44b07635ae5e",
+              "email": "example@mail.com",
+              "phone": "+380981234567"
+            },
+            "createdAt": "2023-09-29T14:11:30.674Z",
+            "updatedAt": "2023-09-29T22:02:10.316Z"
+          },
+          "formatDate": "09.07.2020"
         }
       }
     },
