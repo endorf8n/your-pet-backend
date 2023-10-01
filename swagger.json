@@ -714,6 +714,106 @@
         }
       }
     },
+    "/api/notices/{noticeId}/add-to-favorites": {
+      "patch": {
+        "tags": ["Notices"],
+        "summary": "Add notice to favorite list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "noticeId",
+            "required": true,
+            "description": "Notice`s ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AddNoticeToFavoriteResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response401"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response404"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notices/{noticeId}/remove-from-favorites": {
+      "patch": {
+        "tags": ["Notices"],
+        "summary": "Remove notice to favorite list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "noticeId",
+            "required": true,
+            "description": "Notice`s ID",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RemoveNoticeFromFavoriteResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response401"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response404"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/pets": {
       "post": {
         "tags": ["Pets"],
@@ -2284,6 +2384,200 @@
         },
         "example": {
           "message": "'age' is not allowed to be empty"
+        }
+      },
+      "AddNoticeToFavoriteResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Notices`s ID",
+            "example": "650ee0a34d87a2544204aac1"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of notice",
+            "example": "Sell"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of notice",
+            "example": "Dogs"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the pet",
+            "example": "Cesar"
+          },
+          "date": {
+            "type": "date",
+            "description": "Notice date creation",
+            "example": "2023-09-08T21:00:00.000Z"
+          },
+          "type": {
+            "type": "string",
+            "description": "Pet's breed",
+            "example": "Sphinx"
+          },
+          "file": {
+            "type": "string",
+            "description": "Notice's pet URL",
+            "example": "http://res.cloudinary.com/dkmmhjqew/image/upload/v1695473827/pets/1695473826109-784276609_1564314059_1.jpg.jpg"
+          },
+          "sex": {
+            "type": "string",
+            "description": "Pet's sex",
+            "example": "male"
+          },
+          "location": {
+            "type": "string",
+            "description": "Location of pet's owner",
+            "example": "Odesa"
+          },
+          "price": {
+            "type": "integer",
+            "description": "Price of the pet",
+            "example": "1500"
+          },
+          "comments": {
+            "type": "string",
+            "description": "Notice's comments",
+            "example": "Real friend"
+          },
+          "favorites": {
+            "type": "array",
+            "description": "Favorite notices",
+            "example": ""
+          },
+          "owner": {
+            "type": "string",
+            "description": "Owner's ID",
+            "exampe": "650eda5d4d87a2544204aabb"
+          },
+          "createdAt": {
+            "type": "date",
+            "description": "Notice creation time",
+            "example": "2023-09-28T10:43:40.059Z"
+          },
+          "updatedAt": {
+            "type": "date",
+            "description": "Notice updating time",
+            "example": "2023-09-29T14:26:35.155Z"
+          }
+        },
+        "example": {
+          "_id": "650ee0a34d87a2544204aac1",
+          "category": "sell",
+          "title": "Dogs",
+          "name": "Cesar",
+          "date": "2023-09-08T21:00:00.000Z",
+          "type": "Sphinx",
+          "file": "http://res.cloudinary.com/dkmmhjqew/image/upload/v1695473827/pets/1695473826109-784276609_1564314059_1.jpg.jpg",
+          "sex": "male",
+          "location": "Odesa",
+          "price": "1500",
+          "comments": "Real friend",
+          "favorites": ["6519776c933dcac0dd6d149e"],
+          "owner": "650eda5d4d87a2544204aabb",
+          "createdAt": "2023-09-23T12:57:07.686Z",
+          "updatedAt": "2023-10-01T19:39:55.667Z"
+        }
+      },
+      "RemoveNoticeFromFavoriteResponse": {
+        "type": "object",
+        "properties": {
+          "_id": {
+            "type": "string",
+            "description": "Notices`s ID",
+            "example": "650ee0a34d87a2544204aac1"
+          },
+          "category": {
+            "type": "string",
+            "description": "Category of notice",
+            "example": "Sell"
+          },
+          "title": {
+            "type": "string",
+            "description": "Title of notice",
+            "example": "Dogs"
+          },
+          "name": {
+            "type": "string",
+            "description": "Name of the pet",
+            "example": "Cesar"
+          },
+          "date": {
+            "type": "date",
+            "description": "Notice date creation",
+            "example": "2023-09-08T21:00:00.000Z"
+          },
+          "type": {
+            "type": "string",
+            "description": "Pet's breed",
+            "example": "Sphinx"
+          },
+          "file": {
+            "type": "string",
+            "description": "Notice's pet URL",
+            "example": "http://res.cloudinary.com/dkmmhjqew/image/upload/v1695473827/pets/1695473826109-784276609_1564314059_1.jpg.jpg"
+          },
+          "sex": {
+            "type": "string",
+            "description": "Pet's sex",
+            "example": "male"
+          },
+          "location": {
+            "type": "string",
+            "description": "Location of pet's owner",
+            "example": "Odesa"
+          },
+          "price": {
+            "type": "integer",
+            "description": "Price of the pet",
+            "example": "1500"
+          },
+          "comments": {
+            "type": "string",
+            "description": "Notice's comments",
+            "example": "Real friend"
+          },
+          "favorites": {
+            "type": "array",
+            "description": "Favorite notices",
+            "example": ""
+          },
+          "owner": {
+            "type": "string",
+            "description": "Owner's ID",
+            "exampe": "650eda5d4d87a2544204aabb"
+          },
+          "createdAt": {
+            "type": "date",
+            "description": "Notice creation time",
+            "example": "2023-09-28T10:43:40.059Z"
+          },
+          "updatedAt": {
+            "type": "date",
+            "description": "Notice updating time",
+            "example": "2023-09-29T14:26:35.155Z"
+          }
+        },
+        "example": {
+          "_id": "650ee0a34d87a2544204aac1",
+          "category": "sell",
+          "title": "Dogs",
+          "name": "Cesar",
+          "date": "2023-09-08T21:00:00.000Z",
+          "type": "Sphinx",
+          "file": "http://res.cloudinary.com/dkmmhjqew/image/upload/v1695473827/pets/1695473826109-784276609_1564314059_1.jpg.jpg",
+          "sex": "male",
+          "location": "Odesa",
+          "price": "1500",
+          "comments": "Real friend",
+          "favorites": [],
+          "owner": "650eda5d4d87a2544204aabb",
+          "createdAt": "2023-09-23T12:57:07.686Z",
+          "updatedAt": "2023-10-01T19:39:55.667Z"
         }
       }
     },
