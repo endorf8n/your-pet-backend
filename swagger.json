@@ -283,6 +283,50 @@
           }
         }
       }
+    },
+    "/api/notices": {
+      "get": {
+        "tags": ["Notices"],
+        "summary": "Receive notices based on search criteria and pagination",
+        "parameters": [
+          {
+            "in": "query",
+            "name": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (wrong login information)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response401"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response404"
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "components": {
