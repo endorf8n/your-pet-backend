@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "version": "1.0.0",
+    "version": "1.0.1",
     "title": "YourPet API docs",
     "description": "*Backend documentation for YourPet-project*"
   },
@@ -110,7 +110,7 @@
             }
           },
           "400": {
-            "description": "Bad request (invalid request body)",
+            "description": "Bad request (missing required field)",
             "content": {
               "application/json": {
                 "schema": {
@@ -246,37 +246,17 @@
       }
     },
     "/api/users/current": {
-      "post": {
+      "get": {
         "tags": ["Users"],
-        "summary": "User login",
-        "requestBody": {
-          "description": "Login object",
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/LoginRequest"
-              }
-            }
-          }
-        },
+        "summary": "Get user's information",
+        "security": [{ "Bearer": [] }],
         "responses": {
-          "201": {
+          "200": {
             "description": "Successful operation",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LoginResponse"
-                }
-              }
-            }
-          },
-          "400": {
-            "description": "Bad request (invalid request body)",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/LoginResponse400"
+                  "$ref": "#/components/schemas/CurrentUserResponse"
                 }
               }
             }
@@ -286,7 +266,51 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/LoginResponse401"
+                  "$ref": "#/components/schemas/Response401"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response404"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notices": {
+      "get": {
+        "tags": ["Notices"],
+        "summary": "Receive notices based on search criteria and pagination",
+        "parameters": [
+          {
+            "in": "query",
+            "name": ""
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/CurrentUserResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (wrong login information)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response401"
                 }
               }
             }
@@ -307,10 +331,41 @@
   },
   "components": {
     "schemas": {
+      "Response401": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Unauthorized",
+            "example": "Not authorized"
+          }
+        },
+        "example": {
+          "message": "Not authorized"
+        }
+      },
+      "Response404": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "The requested resource couldn`t be found",
+            "example": "Not Found"
+          }
+        },
+        "example": {
+          "message": "Not Found"
+        }
+      },
       "RegistrationRequest": {
         "type": "object",
-        "required": ["email", "password"],
+        "required": ["name", "email", "password"],
         "properties": {
+          "name": {
+            "type": "string",
+            "description": "User's name",
+            "example": "Example User"
+          },
           "email": {
             "type": "string",
             "description": "User's email",
@@ -319,31 +374,317 @@
           "password": {
             "type": "string",
             "description": "User's password",
-            "example": "qwerty123"
+            "example": "Qwerty123"
           }
         }
       },
       "RegistrationResponse": {
-        "type": "array",
-        "items": {
-          "type": "object",
-          "properties": {
-            "email": {
-              "type": "string",
-              "description": "User's email",
-              "format": "email"
-            },
-            "userId": {
-              "type": "number",
-              "description": "User's id",
-              "example": "32143232436545474"
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "User's name",
+            "example": "Example User"
+          },
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email",
+            "example": "example@mail.com"
+          }
+        },
+        "example": {
+          "name": "Example User",
+          "email": "example@mail.com"
+        }
+      },
+      "RegistrationResponse400": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Bad request (missing required field)",
+            "example": "Name is required"
+          }
+        },
+        "example": {
+          "message": "Name is required"
+        }
+      },
+      "RegistrationResponse409": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Conflict (Provided email already exists)",
+            "example": "Email in use"
+          }
+        },
+        "example": {
+          "message": "Email in use"
+        }
+      },
+      "LoginRequest": {
+        "type": "object",
+        "required": ["email", "password"],
+        "properties": {
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email",
+            "example": "example@mail.com"
+          },
+          "password": {
+            "type": "string",
+            "description": "User's password",
+            "example": "Qwerty123"
+          }
+        }
+      },
+      "LoginResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MTg1YTQwM2VjNmZlODIxZjk3NDkzMCIsImlhdCI6MTY5NjA5NDc5NCwiZXhwIjoxNjk2MTc3NTk0fQ.UlgQGX59TJfBXf2RjMCMj8AZFFXb3f3VKTOggOKVKiE"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MTg1YTQwM2VjNmZlODIxZjk3NDkzMCIsImlhdCI6MTY5NjA5NDc5NCwiZXhwIjoxNjk4Njg2Nzk0fQ.tbDrBToJRomZ-5LyGqJyLFUYQDsH2dyB7U9ZEhJdkbs"
+          },
+          "name": {
+            "type": "string",
+            "description": "User's name",
+            "example": "Example User"
+          }
+        },
+        "example": {
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MTg1YTQwM2VjNmZlODIxZjk3NDkzMCIsImlhdCI6MTY5NjA5NDc5NCwiZXhwIjoxNjk2MTc3NTk0fQ.UlgQGX59TJfBXf2RjMCMj8AZFFXb3f3VKTOggOKVKiE",
+          "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MTg1YTQwM2VjNmZlODIxZjk3NDkzMCIsImlhdCI6MTY5NjA5NDc5NCwiZXhwIjoxNjk4Njg2Nzk0fQ.tbDrBToJRomZ-5LyGqJyLFUYQDsH2dyB7U9ZEhJdkbs",
+          "name": "Example User"
+        }
+      },
+      "LoginResponse400": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Bad request (missing required field)",
+            "example": "Email is required"
+          }
+        },
+        "example": {
+          "message": "Email is required"
+        }
+      },
+      "LoginResponse401": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Unauthorized (wrong login information)",
+            "example": "Email or password is wrong"
+          }
+        },
+        "example": {
+          "message": "Email or password is wrong"
+        }
+      },
+      "EditUserRequest": {
+        "type": "object",
+        "required": ["name", "email", "birthday"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "User's name",
+            "example": "Example User"
+          },
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email",
+            "example": "example@mail.com"
+          },
+          "birthday": {
+            "type": "string",
+            "description": "User's birthday",
+            "example": "10-01-2001"
+          },
+          "phone": {
+            "type": "string",
+            "description": "User's phone number",
+            "example": "+380981234567"
+          },
+          "city": {
+            "type": "string",
+            "description": "User's city",
+            "example": "Kyiv"
+          },
+          "avatar": {
+            "type": "string",
+            "description": "User's avatar URL",
+            "format": "binary"
+          }
+        }
+      },
+      "EditUserResponse": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "description": "User's name",
+            "example": "Example User"
+          },
+          "email": {
+            "type": "string",
+            "description": "User's email",
+            "format": "email",
+            "example": "example@mail.com"
+          },
+          "birthday": {
+            "type": "string",
+            "description": "User's birthday",
+            "example": "10.01.2001"
+          },
+          "phone": {
+            "type": "string",
+            "description": "User's phone number",
+            "example": "+380981234567"
+          },
+          "city": {
+            "type": "string",
+            "description": "User's city",
+            "example": "Kyiv"
+          },
+          "avatar": {
+            "type": "string",
+            "description": "User's avatar URL",
+            "format": "binary"
+          }
+        },
+        "example": {
+          "name": "Example User",
+          "email": "example@mail.com",
+          "birthday": "10.01.2001",
+          "phone": "+380981234567",
+          "city": "Kyiv",
+          "avatarURL": "https://res.cloudinary.com/dkmmhjqew/image/upload/v1696086608/default-avatar/Photo_default_ndssoh.png"
+        }
+      },
+      "CurrentUserResponse": {
+        "type": "object",
+        "properties": {
+          "user": {
+            "type": "object",
+            "properties": {
+              "_id": {
+                "type": "string",
+                "description": "User's ID",
+                "example": "65186c5330bededdc19d5288"
+              },
+              "name": {
+                "type": "string",
+                "description": "User's name",
+                "example": "Example User"
+              },
+              "email": {
+                "type": "string",
+                "description": "User's email",
+                "format": "email",
+                "example": "example@mail.com"
+              },
+              "avatarURL": {
+                "type": "string",
+                "description": "User's avatar URL",
+                "example": "https://res.cloudinary.com/dkmmhjqew/image/upload/v1696086608/default-avatar/Photo_default_ndssoh.png"
+              },
+              "phone": {
+                "type": "string",
+                "description": "User's phone number",
+                "example": "+380981234567"
+              },
+              "city": {
+                "type": "string",
+                "description": "User's city",
+                "example": "Kyiv"
+              },
+              "birthday": {
+                "type": "string",
+                "description": "User's birthday",
+                "example": "10.01.2001"
+              },
+              "pets": {
+                "type": "array",
+                "items": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "description": "Pet`s ID",
+                      "example": "65187091ceba2657d84e286f"
+                    },
+                    "name": {
+                      "type": "string",
+                      "description": "Pet's name",
+                      "example": "Dolar"
+                    },
+                    "dateOfBirth": {
+                      "type": "string",
+                      "description": "Pet's birthday",
+                      "example": "10.01.2021"
+                    },
+                    "type": {
+                      "type": "string",
+                      "description": "Pet's breed",
+                      "example": "Doberman"
+                    },
+                    "comments": {
+                      "type": "string",
+                      "description": "Comments",
+                      "example": "An incredible companion that brings joy to life"
+                    },
+                    "petURL": {
+                      "type": "string",
+                      "description": "User's pet URL",
+                      "example": "http://res.cloudinary.com/dkmmhjqew/image/upload/v1696100496/owner-pets/1696100494730-172559447_Doberman.jpg.jpg"
+                    }
+                  }
+                }
+              }
             }
           }
         },
-        "example": [
-          { "email": "1@gmail.com", "userId": "1" },
-          { "email": "2@gmail.com", "userId": "2" }
-        ]
+        "example": {
+          "user": {
+            "_id": "65186c5330bededdc19d5288",
+            "name": "Example User",
+            "email": "example@mail.com",
+            "avatarURL": "https://res.cloudinary.com/dkmmhjqew/image/upload/v1696086608/default-avatar/Photo_default_ndssoh.png",
+            "phone": "+380981234567",
+            "city": "Kyiv",
+            "birthday": "10.01.2001",
+            "pets": [
+              {
+                "_id": "64c772d4906c009cfba4f8a9",
+                "name": "Dolar",
+                "dateOfBirth": "10.01.2021",
+                "type": "Doberman",
+                "comments": "An incredible companion that brings joy to life",
+                "petURL": "http://res.cloudinary.com/dkmmhjqew/image/upload/v1696100496/owner-pets/1696100494730-172559447_Doberman.jpg.jpg"
+              },
+              {
+                "_id": "651870a3ceba2657d84e2872",
+                "name": "Klio",
+                "dateOfBirth": "30.01.2020",
+                "type": "British shorthair",
+                "comments": "Have a sweet and gentle temperament, making her great companion and ideal for family",
+                "petURL": "http://res.cloudinary.com/dkmmhjqew/image/upload/v1696100514/owner-pets/1696100513404-598814128_Doberman.jpg.jpg"
+              }
+            ]
+          }
+        }
       }
     },
     "securitySchemes": {
