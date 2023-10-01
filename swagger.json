@@ -433,6 +433,190 @@
         }
       }
     },
+    "/api/notices/user-notices": {
+      "get": {
+        "tags": ["Notices"],
+        "summary": "Receive users notices based on search criteria and pagination",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "searchQuery",
+            "description": "Search query for text search",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "age",
+            "description": "Age filter for notices",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sex",
+            "description": "Sex filter for notices",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["male", "female"]
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Page number for paginataion",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Number of items per page",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserNoticesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserNoticesResponse400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response401"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response404"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/notices/favorites": {
+      "get": {
+        "tags": ["Notices"],
+        "summary": "Receive favorite user's notices",
+        "parameters": [
+          {
+            "in": "query",
+            "name": "searchQuery",
+            "description": "Search query for text search",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "in": "query",
+            "name": "age",
+            "description": "Age filter for notices",
+            "required": false,
+            "type": "array",
+            "items": {
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "sex",
+            "description": "Sex filter for notices",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "enum": ["male", "female"]
+            }
+          },
+          {
+            "in": "query",
+            "name": "page",
+            "description": "Page number for paginataion",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "in": "query",
+            "name": "limit",
+            "description": "Number of items per page",
+            "required": false,
+            "type": "integer"
+          }
+        ],
+        "security": [{ "Bearer": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful operation",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserNoticesResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GetUserNoticesResponse400"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response401"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Response404"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/notices/{noticeId}": {
       "get": {
         "tags": ["Notices"],
@@ -1928,6 +2112,178 @@
             "updatedAt": "2023-09-29T22:02:10.316Z"
           },
           "formatDate": "09.07.2020"
+        }
+      },
+      "GetUserNoticesResponse": {
+        "type": "object",
+        "properties": {
+          "page": {
+            "type": "integer",
+            "description": "Page number",
+            "example": "1"
+          },
+          "limit": {
+            "type": "integer",
+            "description": "Items per page",
+            "example": "12"
+          },
+          "total": {
+            "type": "integer",
+            "description": "Total number of notices",
+            "example": "2"
+          },
+          "totalPages": {
+            "type": "integer",
+            "description": "Total number of pages",
+            "example": "1"
+          },
+          "notices": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string",
+                  "description": "Notices`s ID",
+                  "example": "6516db126d4047b47404f0dc"
+                },
+                "category": {
+                  "type": "string",
+                  "description": "Category of notices",
+                  "example": "Sell"
+                },
+                "title": {
+                  "type": "string",
+                  "description": "Title of notices",
+                  "example": "Dogs"
+                },
+                "name": {
+                  "type": "string",
+                  "description": "Name of the pet",
+                  "example": "Baron"
+                },
+                "date": {
+                  "type": "date",
+                  "description": "Date of the notice",
+                  "example": "2021-08-30T21:00:00.000Z"
+                },
+                "type": {
+                  "type": "string",
+                  "description": "Pet's breed",
+                  "example": "Sphinx"
+                },
+                "file": {
+                  "type": "string",
+                  "description": "Notice's pet URL",
+                  "example": "http://res.cloudinary.com/dkmmhjqew/image/upload/v1695996689/pets/1695996688982-903310852_1564314059_1.jpg.jpg"
+                },
+                "sex": {
+                  "type": "string",
+                  "description": "Pet's sex",
+                  "example": "Male"
+                },
+                "location": {
+                  "type": "string",
+                  "description": "Location of pet's owner",
+                  "example": "Kyiv"
+                },
+                "price": {
+                  "type": "integer",
+                  "description": "Price of the pet",
+                  "example": "1000"
+                },
+                "age": {
+                  "type": "integer",
+                  "description": "Pet's age",
+                  "example": "1"
+                },
+                "comments": {
+                  "type": "string",
+                  "description": "Notice's comments",
+                  "example": "Real friend"
+                },
+                "favorites": {
+                  "type": "array",
+                  "description": "Favorite notices",
+                  "example": ""
+                },
+                "owner": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string",
+                      "description": "Owner`s ID",
+                      "example": "6516b746b82f44b07635ae5e"
+                    },
+                    "email": {
+                      "type": "string",
+                      "description": "Owner's email",
+                      "format": "email",
+                      "example": "example@mail.com"
+                    },
+                    "phone": {
+                      "type": "string",
+                      "description": "Owner's phone number",
+                      "example": "+380981234567"
+                    }
+                  }
+                },
+                "createdAt": {
+                  "type": "date",
+                  "description": "Notice creation time",
+                  "example": "2023-09-28T10:43:40.059Z"
+                },
+                "updatedAt": {
+                  "type": "date",
+                  "description": "Notice updating time",
+                  "example": "2023-09-29T14:26:35.155Z"
+                }
+              }
+            }
+          }
+        },
+        "example": {
+          "page": "1",
+          "limit": "12",
+          "total": "10",
+          "totalPages": "1",
+          "notices": [
+            {
+              "_id": "6516db126d4047b47404f0dc",
+              "category": "sell",
+              "title": "dogs",
+              "name": "Baron",
+              "date": "2021-08-30T21:00:00.000Z",
+              "type": "Sphinx",
+              "file": "http://res.cloudinary.com/dkmmhjqew/image/upload/v1695996689/pets/1695996688982-903310852_1564314059_1.jpg.jpg",
+              "sex": "male",
+              "location": "Kyiv",
+              "price": "1033",
+              "age": "2.08",
+              "comments": "Real friend",
+              "favorites": "[]",
+              "owner": {
+                "_id": "6516b746b82f44b07635ae5e",
+                "email": "example@mail.com",
+                "phone": "+380981234567"
+              },
+              "createdAt": "2023-09-29T14:11:30.674Z",
+              "updatedAt": "2023-09-29T22:02:10.316Z"
+            }
+          ]
+        }
+      },
+      "GetUserNoticesResponse400": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Bad request",
+            "example": "'age' is not allowed to be empty"
+          }
+        },
+        "example": {
+          "message": "'age' is not allowed to be empty"
         }
       }
     },
