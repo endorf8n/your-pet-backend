@@ -1,9 +1,9 @@
 {
   "openapi": "3.0.1",
   "info": {
-    "version": "1.0.5",
+    "version": "1.0.7",
     "title": "YourPet API docs",
-    "description": "*Backend documentation for YourPet-project*<br></br>**YourPet API**<br></br>YourPet is an application that brings together pet owners and those, who seeking a new furry friend. Here, you can register your pet, share their story, and find a new home for homeless animals. With an intuitive interface, easily search and filter notices by category, age and gender. Add your beloved pets and share the joy with YourPet!<br></br>**Key features:**<br></br> *Registration and Authentication:* Simple and fast registration and authorization for each user, including Google authorization<br></br>*Profile Updates:* Set an avatar, specify location, phone, and date of birth for a personalized profile<br></br>*Search and Filter Notices:* Easy access to pet notices with filtering options by category, age, and gender<br></br>*Add Your Own Pets:* Adding information about your own pets (including pet image), viewing and posibility to delete this information<br></br>*Create Notices:* Ability to create personal notices, viewing, editing and deleting notices, their multi-level sorting by categories<br></br>**Technology stack used in the project:**<br></br>Node.js - JavaScript execution environment on server<br></br>Express.js - framework for developing web applications on Node.js<br></br>MongoDB - NoSQL database<br></br>Mongoose - library for working with MongoDB in Node.js<br></br>jsonwebtoken and bcryptjs libraries - for creating, validating tokens and hashing passwords<br></br>Cloudinary - for work with adding and deleting remote images<br></br>swagger-ui-express library - for creating backend swagger-documentation<br></br>**Links:**<br></br>[Backend repository](https://github.com/endorf8n/your-pet-backend)<br></br>[Project's live page](https://cyanidium1.github.io/your-pet-front/)<br></br>**Developers (frontend):**<br></br>[Fedir Alpatov](mailto:fedir@gmail.com)<br></br>[Vyacheslav Pavlyuk](mailto:vyach@gmail.com)<br></br>[Mariia Voloshanovska](mailto:maria@gmail.com)<br></br>[Roman Kushnir](mailto:roman@gmail.com)<br></br>[Stanislav Poponia](mailto:stas@gmail.com)<br></br>[Oleh Vasyliev](mailto:olehh@gmail.com)<br></br>[Bohdan Domanskiy](mailto:bodia@gmail.com)<br></br>[Olena Troyan](mailto:lena@gmail.com)<br></br>[Volodymyr Borysenko](mailto:borys@gmail.com)<br></br>**Developers (backend):**<br></br>[Dmytro Naziuta](mailto:dima.naziuta@gmail.com)<br></br>[Volodymyr Konopka](mailto:volodymyr.konopka@gmail.com)<br></br>"
+    "description": "*Backend documentation for YourPet-project*<br></br>**YourPet API**<br></br>YourPet is an application that brings together pet owners and those, who seeking a new furry friend. Here, you can register your pet, share their story, and find a new home for homeless animals. With an intuitive interface, easily search and filter notices by category, age and gender. Add your beloved pets and share the joy with YourPet!<br></br>**Key features:**<br></br> *Registration and Authentication:* Simple and fast registration and authorization for each user, including Google authorization<br></br>*Profile Updates:* Set an avatar, specify location, phone, and date of birth for a personalized profile<br></br>*Search and Filter Notices:* Easy access to pet notices with filtering options by category, age, and gender<br></br>*Add Your Own Pets:* Adding information about your own pets (including pet image), viewing and posibility to delete this information<br></br>*Create Notices:* Ability to create personal notices, viewing, editing and deleting notices, their multi-level sorting by categories<br></br>**Technology stack used in the project:**<br></br>Node.js - JavaScript execution environment on server<br></br>Express.js - framework for developing web applications on Node.js<br></br>MongoDB - NoSQL database<br></br>Mongoose - library for working with MongoDB in Node.js<br></br>jsonwebtoken and bcryptjs libraries - for creating, validating tokens and hashing passwords<br></br>Cloudinary - for work with adding and deleting remote images<br></br>swagger-ui-express library - for creating backend swagger-documentation<br></br>**Links:**<br></br>[Backend repository](https://github.com/endorf8n/your-pet-backend)<br></br>[Project's live page](https://cyanidium1.github.io/your-pet-front/)<br></br>**Developers (frontend):**<br></br>[Fedir Alpatov](mailto:fedir@gmail.com)<br></br>[Vyacheslav Pavlyuk](mailto:vyacheslav.pavlyuk.dev@gmail.com)<br></br>[Mariia Voloshanovska](mailto:maria@gmail.com)<br></br>[Roman Kushnir](mailto:kushnirroman22@gmail.com)<br></br>[Stanislav Poponia](mailto:mosnizeoffcial@gmail.com)<br></br>[Oleh Vasyliev](mailto:olehh@gmail.com)<br></br>[Bohdan Domanskyi](mailto:bogdandom52@gmail.com)<br></br>[Olena Troyan](mailto:lena@gmail.com)<br></br>[Volodymyr Borysenko](mailto:borys@gmail.com)<br></br>**Developers (backend):**<br></br>[Dmytro Naziuta](mailto:vidistudioproduction@gmail.com)<br></br>[Volodymyr Konopka](mailto:volodymyr.konopka@gmail.com)<br></br>"
   },
   "consumes": ["application/json", "multipart/form-data"],
   "produces": ["application/json"],
@@ -277,6 +277,47 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/Response404"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/users/refresh": {
+      "get": {
+        "tags": ["Users"],
+        "summary": "Refresh token",
+        "description": "Refreshes the authentication token",
+        "parameters": [
+          {
+            "in": "cookie",
+            "name": "refreshToken",
+            "schema": {
+              "type": "string"
+            },
+            "required": true,
+            "descriptioin": "The refresh token from the user's cookies"
+          }
+        ],
+        "security": [{ "cookieAuth": [] }],
+        "responses": {
+          "200": {
+            "description": "Successful token's refresh",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshTokenResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized (Invalid or missing refresh token)",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RefreshTokenResponse401"
                 }
               }
             }
@@ -2446,8 +2487,11 @@
           },
           "favorites": {
             "type": "array",
-            "description": "Favorite notices",
-            "example": ""
+            "description": "User's ID",
+            "items": {
+              "type": "string",
+              "example": "6519776c933dcac0dd6d149e"
+            }
           },
           "owner": {
             "type": "string",
@@ -2579,6 +2623,34 @@
           "createdAt": "2023-09-23T12:57:07.686Z",
           "updatedAt": "2023-10-01T19:39:55.667Z"
         }
+      },
+      "RefreshTokenResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string",
+            "description": "Token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MTg1YTQwM2VjNmZlODIxZjk3NDkzMCIsImlhdCI6MTY5NjA5NDc5NCwiZXhwIjoxNjk2MTc3NTk0fQ.UlgQGX59TJfBXf2RjMCMj8AZFFXb3f3VKTOggOKVKiE"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MTg1YTQwM2VjNmZlODIxZjk3NDkzMCIsImlhdCI6MTY5NjA5NDc5NCwiZXhwIjoxNjk4Njg2Nzk0fQ.tbDrBToJRomZ-5LyGqJyLFUYQDsH2dyB7U9ZEhJdkbs"
+          }
+        }
+      },
+      "RefreshTokenResponse401": {
+        "type": "object",
+        "properties": {
+          "message": {
+            "type": "string",
+            "description": "Unauthorized (Invalid or missing refresh token)",
+            "example": "Invalid refresh token"
+          }
+        },
+        "example": {
+          "message": "Invalid refresh token"
+        }
       }
     },
     "securitySchemes": {
@@ -2586,6 +2658,12 @@
         "type": "http",
         "scheme": "bearer",
         "bearerFormat": "JWT"
+      },
+      "cookieAuth": {
+        "type": "apiKey",
+        "name": "refreshToken",
+        "in": "cookie",
+        "description": "Use the refresh token stored in a cookie to authenticate."
       }
     }
   }
