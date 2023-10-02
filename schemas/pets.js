@@ -19,6 +19,10 @@ const addPetSchema = Joi.object({
     "any required": "Type is required",
   }),
 
+  petImage: Joi.any().messages({
+    "any.required": "PetImage is required",
+  }),
+
   comments: Joi.string().max(180).messages({
     "string.max": "Comments must be no more than {#limit} characters",
   }),
