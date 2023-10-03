@@ -38,10 +38,14 @@ const register = async (req, res) => {
     password: hashPassword,
     birthday,
   });
+  const { token, refreshToken } = generateToken(newUser._id);
+  await User.findByIdAndUpdate(newUser._id, { token, refreshToken });
 
   res.status(201).json({
     name: newUser.name,
     email: newUser.email,
+    token,
+    refreshToken,
   });
 };
 

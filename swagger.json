@@ -1117,11 +1117,23 @@
             "description": "User's email",
             "format": "email",
             "example": "example@mail.com"
+          },
+          "token": {
+            "type": "string",
+            "description": "Token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MTg1YTQwM2VjNmZlODIxZjk3NDkzMCIsImlhdCI6MTY5NjA5NDc5NCwiZXhwIjoxNjk2MTc3NTk0fQ.UlgQGX59TJfBXf2RjMCMj8AZFFXb3f3VKTOggOKVKiE"
+          },
+          "refreshToken": {
+            "type": "string",
+            "description": "Refresh token",
+            "example": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MTg1YTQwM2VjNmZlODIxZjk3NDkzMCIsImlhdCI6MTY5NjA5NDc5NCwiZXhwIjoxNjk4Njg2Nzk0fQ.tbDrBToJRomZ-5LyGqJyLFUYQDsH2dyB7U9ZEhJdkbs"
           }
         },
         "example": {
           "name": "Example User",
-          "email": "example@mail.com"
+          "email": "example@mail.com",
+          "token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MTg1YTQwM2VjNmZlODIxZjk3NDkzMCIsImlhdCI6MTY5NjA5NDc5NCwiZXhwIjoxNjk2MTc3NTk0fQ.UlgQGX59TJfBXf2RjMCMj8AZFFXb3f3VKTOggOKVKiE",
+          "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY1MTg1YTQwM2VjNmZlODIxZjk3NDkzMCIsImlhdCI6MTY5NjA5NDc5NCwiZXhwIjoxNjk4Njg2Nzk0fQ.tbDrBToJRomZ-5LyGqJyLFUYQDsH2dyB7U9ZEhJdkbs"
         }
       },
       "RegistrationResponse400": {
