@@ -250,6 +250,8 @@ const googleRedirect = async (req, res) => {
       httpOnly: true,
     });
 
+    res.status(200).json({token, refreshToken});
+
     return res.redirect(
       `http://localhost:3000/your-pet-front/login`
     );
@@ -265,7 +267,7 @@ const googleRedirect = async (req, res) => {
     maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
   });
-  
+  res.status(200).json({token, refreshToken});
 
   return res.redirect(
     `http://localhost:3000/your-pet-front/login`
