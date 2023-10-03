@@ -251,7 +251,7 @@ const googleRedirect = async (req, res) => {
     });
 
     return res.redirect(
-      `${FRONTEND_URL}?token=${token}&refreshToken=${refreshToken}`
+      `${FRONTEND_URL}`
     );
   }
 
@@ -268,7 +268,7 @@ const googleRedirect = async (req, res) => {
   
 
   return res.redirect(
-    `${FRONTEND_URL}?token=${token}&refreshToken=${refreshToken}`
+    `${FRONTEND_URL}`
   );
 };
 
