@@ -241,6 +241,10 @@ const googleRedirect = async (req, res) => {
 
     const { token, refreshToken } = generateToken(newUser._id);
     await User.findByIdAndUpdate(newUser._id, { token, refreshToken });
+    res.cookie("token", token, {
+      maxAge: 23 * 60 * 60 * 1000,
+      httpOnly: true,
+    });
     res.cookie("refreshToken", refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
       httpOnly: true,
@@ -253,10 +257,15 @@ const googleRedirect = async (req, res) => {
 
   const { token, refreshToken } = generateToken(user._id);
   await User.findByIdAndUpdate(user._id, { token, refreshToken });
+  res.cookie("token", token, {
+      maxAge: 23 * 60 * 60 * 1000,
+      httpOnly: true,
+    });
   res.cookie("refreshToken", refreshToken, {
     maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
   });
+  
 
   return res.redirect(
     `${FRONTEND_URL}?token=${token}&refreshToken=${refreshToken}`
