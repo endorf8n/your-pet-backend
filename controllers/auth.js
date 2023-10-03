@@ -11,7 +11,7 @@ const {
   normalizedDate,
   formattedDate,
   generateRandomPassword,
-  generateToken
+  generateToken,
 } = require("../helpers");
 const { ctrlWrapper } = require("../decorators");
 
@@ -38,10 +38,14 @@ const register = async (req, res) => {
     password: hashPassword,
     birthday,
   });
+  const { token, refreshToken } = generateToken(newUser._id);
+  await User.findByIdAndUpdate(newUser._id, { token, refreshToken });
 
   res.status(201).json({
     name: newUser.name,
     email: newUser.email,
+    token,
+    refreshToken,
   });
 };
 
@@ -57,7 +61,7 @@ const login = async (req, res) => {
     throw HttpError(401, "Email or password is wrong");
   }
 
-  const {token, refreshToken} = generateToken(user._id);
+  const { token, refreshToken } = generateToken(user._id);
 
   await User.findByIdAndUpdate(user._id, { token, refreshToken });
   res.cookie("refreshToken", refreshToken, {
@@ -235,7 +239,7 @@ const googleRedirect = async (req, res) => {
       password: hashPassword,
     });
 
-    const {token, refreshToken} = generateToken(newUser._id);
+    const { token, refreshToken } = generateToken(newUser._id);
     await User.findByIdAndUpdate(newUser._id, { token, refreshToken });
     res.cookie("refreshToken", refreshToken, {
       maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -247,7 +251,7 @@ const googleRedirect = async (req, res) => {
     );
   }
 
-  const {token, refreshToken} = generateToken(user._id);
+  const { token, refreshToken } = generateToken(user._id);
   await User.findByIdAndUpdate(user._id, { token, refreshToken });
   res.cookie("refreshToken", refreshToken, {
     maxAge: 30 * 24 * 60 * 60 * 1000,
@@ -273,7 +277,9 @@ const refreshToken = async (req, res) => {
     throw HttpError(401, "Invalid refresh token");
   }
 
-  const {token: newToken, refreshToken: newRefreshToken} = generateToken(user._id);
+  const { token: newToken, refreshToken: newRefreshToken } = generateToken(
+    user._id
+  );
 
   res.cookie("refreshToken", newRefreshToken, {
     maxAge: 30 * 24 * 60 * 60 * 1000,
