@@ -251,7 +251,7 @@ const googleRedirect = async (req, res) => {
     });
 
     return res.redirect(
-      `${FRONTEND_URL}`
+      `http://localhost:4000/your-pet-front`
     );
   }
 
@@ -268,7 +268,7 @@ const googleRedirect = async (req, res) => {
   
 
   return res.redirect(
-    `${FRONTEND_URL}`
+    `http://localhost:4000/your-pet-front`
   );
 };
 
