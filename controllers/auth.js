@@ -123,12 +123,14 @@ const editProfile = async (req, res) => {
   const formattedBirthday = formattedDate(birthday);
 
   res.json({
-    name,
-    email,
-    phone,
-    city,
-    birthday: formattedBirthday,
-    avatarURL: avatarURL || editedUser.avatarURL,
+    user: {
+      name,
+      email,
+      phone,
+      city,
+      birthday: formattedBirthday,
+      avatarURL: avatarURL || editedUser.avatarURL,
+    },
   });
 };
 
@@ -258,9 +260,9 @@ const googleRedirect = async (req, res) => {
   const { token, refreshToken } = generateToken(user._id);
   await User.findByIdAndUpdate(user._id, { token, refreshToken });
   res.cookie("token", token, {
-      maxAge: 23 * 60 * 60 * 1000,
-      httpOnly: true,
-    });
+    maxAge: 23 * 60 * 60 * 1000,
+    httpOnly: true,
+  });
   res.cookie("refreshToken", refreshToken, {
     maxAge: 30 * 24 * 60 * 60 * 1000,
     httpOnly: true,
