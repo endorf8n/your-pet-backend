@@ -1270,45 +1270,52 @@
       "EditUserResponse": {
         "type": "object",
         "properties": {
-          "name": {
-            "type": "string",
-            "description": "User's name",
-            "example": "Example User"
-          },
-          "email": {
-            "type": "string",
-            "description": "User's email",
-            "format": "email",
-            "example": "example@mail.com"
-          },
-          "birthday": {
-            "type": "string",
-            "description": "User's birthday",
-            "example": "10.01.2001"
-          },
-          "phone": {
-            "type": "string",
-            "description": "User's phone number",
-            "example": "+380981234567"
-          },
-          "city": {
-            "type": "string",
-            "description": "User's city",
-            "example": "Kyiv"
-          },
-          "avatar": {
-            "type": "string",
-            "description": "User's avatar URL",
-            "format": "binary"
+          "user": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "description": "User's name",
+                "example": "Example User"
+              },
+              "email": {
+                "type": "string",
+                "description": "User's email",
+                "format": "email",
+                "example": "example@mail.com"
+              },
+              "birthday": {
+                "type": "string",
+                "description": "User's birthday",
+                "example": "10.01.2001"
+              },
+              "phone": {
+                "type": "string",
+                "description": "User's phone number",
+                "example": "+380981234567"
+              },
+              "city": {
+                "type": "string",
+                "description": "User's city",
+                "example": "Kyiv"
+              },
+              "avatar": {
+                "type": "string",
+                "description": "User's avatar URL",
+                "format": "binary"
+              }
+            }
           }
         },
         "example": {
-          "name": "Example User",
-          "email": "example@mail.com",
-          "birthday": "10.01.2001",
-          "phone": "+380981234567",
-          "city": "Kyiv",
-          "avatarURL": "https://res.cloudinary.com/dkmmhjqew/image/upload/v1696086608/default-avatar/Photo_default_ndssoh.png"
+          "user": {
+            "name": "Example User",
+            "email": "example@mail.com",
+            "birthday": "10.01.2001",
+            "phone": "+380981234567",
+            "city": "Kyiv",
+            "avatarURL": "https://res.cloudinary.com/dkmmhjqew/image/upload/v1696086608/default-avatar/Photo_default_ndssoh.png"
+          }
         }
       },
       "CurrentUserResponse": {
