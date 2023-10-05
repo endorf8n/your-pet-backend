@@ -8,7 +8,6 @@ const buildSearchConfigurations = (query) => {
     sex,
   } = query;
   const searchConfigurations = {};
-  const score = {}
 
   if (category) {
     searchConfigurations.category = category;
@@ -19,8 +18,7 @@ const buildSearchConfigurations = (query) => {
   }
 
   if (searchQuery) {
-    searchConfigurations["$text"] = { $search: searchQuery };
-    score.score = { $meta: "textScore" };
+    searchConfigurations.title = { $regex: searchQuery, $options: "i" };
   }
 
   if (Array.isArray(age)) {
@@ -37,7 +35,6 @@ const buildSearchConfigurations = (query) => {
         return null;
       })
       .filter((ageFilter) => ageFilter !== null);
-    console.log(ageFilters);
 
     if (ageFilters.length > 0) {
       searchConfigurations["$or"] = ageFilters.map((ageFilter) => ({
@@ -58,7 +55,7 @@ const buildSearchConfigurations = (query) => {
     }
   }
 
-  return { searchConfigurations, score };
+  return { searchConfigurations };
 }
 
 module.exports = buildSearchConfigurations;

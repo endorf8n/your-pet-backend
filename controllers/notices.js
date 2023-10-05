@@ -23,16 +23,16 @@ const getNotices = async (req, res) => {
     throw HttpError(400, error.message);
   }
 
-  const { searchConfigurations, score } = buildSearchConfigurations(req.query);
+  const { searchConfigurations } = buildSearchConfigurations(req.query);
   const { skip, page, limit } = buildPaginationOptions(req.query);
-
+  console.log(searchConfigurations)
   const total = await Notice.countDocuments(searchConfigurations);
   const totalPages = Math.ceil(total / limit);
   if (total === 0 || page > totalPages) {
     throw HttpError(404, "Notiсes not found for your request");
   }
 
-  const notices = await Notice.find(searchConfigurations, score, {
+  const notices = await Notice.find(searchConfigurations,'', {
     skip,
     limit,
   })
@@ -40,7 +40,7 @@ const getNotices = async (req, res) => {
       path: "owner",
       select: { email: 1, phone: 1 },
     })
-    .sort({ ...score, createdAt: -1 });
+    .sort({ createdAt: -1 });
 
   res.status(200).json({ page, limit, total, totalPages, notices });
 };
@@ -69,7 +69,7 @@ const getUserNotices = async (req, res) => {
     throw HttpError(400, error.message);
   }
 
-  const { searchConfigurations, score } = buildSearchConfigurations(req.query);
+  const { searchConfigurations } = buildSearchConfigurations(req.query);
   const { skip, page, limit } = buildPaginationOptions(req.query);
   searchConfigurations.owner = owner;
 
@@ -79,7 +79,7 @@ const getUserNotices = async (req, res) => {
     throw HttpError(404, "Notiсes not found for your request");
   }
 
-  const notices = await Notice.find(searchConfigurations, score, {
+  const notices = await Notice.find(searchConfigurations, '', {
     skip,
     limit,
   })
@@ -87,7 +87,7 @@ const getUserNotices = async (req, res) => {
       path: "owner",
       select: { email: 1, phone: 1 },
     })
-    .sort({ ...score, createdAt: -1 });
+    .sort({ createdAt: -1 });
 
   res.status(200).json({ page, limit, total, totalPages, notices });
 };
@@ -186,7 +186,7 @@ const getNoticesFromFavorites = async (req, res) => {
     throw HttpError(400, error.message);
   }
 
-  const { searchConfigurations, score } = buildSearchConfigurations(req.query);
+  const { searchConfigurations } = buildSearchConfigurations(req.query);
   const { skip, page, limit } = buildPaginationOptions(req.query);
   searchConfigurations.favorites = { $in: [_id] };
 
@@ -196,7 +196,7 @@ const getNoticesFromFavorites = async (req, res) => {
     throw HttpError(404, "Notiсes not found for your request");
   }
 
-  const notices = await Notice.find(searchConfigurations, score, {
+  const notices = await Notice.find(searchConfigurations, '', {
     skip,
     limit,
   })
@@ -204,7 +204,7 @@ const getNoticesFromFavorites = async (req, res) => {
       path: "owner",
       select: { email: 1, phone: 1 },
     })
-    .sort({ ...score, createdAt: -1 });
+    .sort({ createdAt: -1 });
 
   res.status(200).json({ page, limit, total, totalPages, notices });
 };
