@@ -12,11 +12,9 @@ const getNews = async (req, res) => {
   const { skip, page, limit } = buildPaginationOptions(req.query);
   const { searchQuery = "" } = req.query;
   const searchConfigurations = {};
-  const score = {};
 
   if (searchQuery) {
-    searchConfigurations["$text"] = { $search: searchQuery };
-    score.score = { $meta: "textScore" };
+    searchConfigurations.title = { $regex: searchQuery, $options: "i" };
   }
 
   const total = await New.countDocuments(searchConfigurations);
@@ -25,11 +23,11 @@ const getNews = async (req, res) => {
     throw HttpError(404, "News not found for your request")
   }
 
-  const news = await New.find(searchConfigurations, score)
+  const news = await New.find(searchConfigurations)
     .select("uuid title description url image_url published_at")
     .skip(skip)
     .limit(limit)
-    .sort({ ...score, published_at: -1 });
+    .sort({ published_at: -1 });
   
   res.status(200).json({ page, limit, total, totalPages, news});
 };
